@@ -1,0 +1,16 @@
+{
+  "name": "cie-horme-studio",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "deploy": "sanity deploy"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "sanity": "^3.62.3",
+    "styled-components": "^6.1.13"
+  }
+}

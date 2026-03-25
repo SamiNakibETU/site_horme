@@ -1,36 +1,26 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Site Cie. Horme (Next.js + Sanity)
 
-## Getting Started
-
-First, run the development server:
+## Développement local
 
 ```bash
+npm install
+cp .env.example .env.local
+# Renseigner .env.local (sans commiter ce fichier)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Studio Sanity :
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cd studio && npm install && npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Déploiement Vercel
 
-## Learn More
+1. Importer ce dépôt sur [Vercel](https://vercel.com) — **racine du projet = la racine de ce repo** (pas de sous-dossier).
+2. Variables d’environnement (Production) : reprendre les clés de `.env.example` (valeurs dans le dashboard Vercel, pas dans Git).
+3. Webhook Sanity : `POST https://<ton-domaine>/api/revalidate` avec le secret `SANITY_REVALIDATE_SECRET`.
 
-To learn more about Next.js, take a look at the following resources:
+## Secrets
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Ne pas committer `.env.local`, `studio/.env`, ni aucun fichier contenant des tokens.

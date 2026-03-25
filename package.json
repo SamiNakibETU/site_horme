@@ -6,21 +6,32 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "studio": "npm run dev --prefix studio",
+    "seed:sanity": "node scripts/seed-sanity.mjs"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
+    "@portabletext/react": "^6.0.3",
+    "@sanity/client": "^6.24.1",
+    "@sanity/image-url": "^1.0.2",
+    "framer-motion": "^12.35.0",
+    "gsap": "^3.14.2",
+    "next": "14.2.35",
+    "next-sanity": "^9.12.3",
     "react": "^18",
-    "react-dom": "^18",
-    "next": "14.2.35"
+    "react-dom": "^18"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@sanity/vision": "^3.62.3",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
     "eslint": "^8",
-    "eslint-config-next": "14.2.35"
+    "eslint-config-next": "14.2.35",
+    "postcss": "^8",
+    "sanity": "^3.62.3",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
   }
 }
