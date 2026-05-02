@@ -1,6 +1,7 @@
 import { defineConfig } from 'sanity'
 import { structureTool } from 'sanity/structure'
 import { presentationTool } from 'sanity/presentation'
+import { media } from 'sanity-plugin-media'
 import { schemaTypes } from './schemaTypes'
 import { structure } from './structure'
 
@@ -17,6 +18,7 @@ export default defineConfig({
   dataset,
   plugins: [
     structureTool({ structure }),
+    media(),
     presentationTool({
       previewUrl: {
         initial: previewUrl,

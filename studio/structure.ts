@@ -14,17 +14,73 @@ const singletonListItem = (
 
 export const structure: StructureResolver = S =>
   S.list()
-    .title('Contenu')
+    .title(‘📍 Contenu du site Horrmê’)
     .items([
-      singletonListItem(S, 'siteSettings', 'Paramètres & SEO', SANITY_SINGLETON_IDS.siteSettings),
-      singletonListItem(S, 'navigation', 'Menu', SANITY_SINGLETON_IDS.navigation),
-      singletonListItem(S, 'footerContent', 'Pied de page', SANITY_SINGLETON_IDS.footerContent),
+      // ===== PAGES PRINCIPALES =====
+      S.listItem()
+        .title(‘📄 PAGES PRINCIPALES’)
+        .id(‘pages-groupe’)
+        .child(
+          S.list()
+            .title(‘Pages du site’)
+            .items([
+              singletonListItem(
+                S,
+                ‘homePage’,
+                ‘🏠 Accueil’,
+                SANITY_SINGLETON_IDS.homePage,
+              ),
+              singletonListItem(
+                S,
+                ‘presentationPage’,
+                ‘👥 Présentation’,
+                SANITY_SINGLETON_IDS.presentationPage,
+              ),
+              singletonListItem(
+                S,
+                ‘contactPage’,
+                ‘✉️ Contact’,
+                SANITY_SINGLETON_IDS.contactPage,
+              ),
+            ]),
+        ),
+
       S.divider(),
-      singletonListItem(S, 'homePage', 'Accueil', SANITY_SINGLETON_IDS.homePage),
-      singletonListItem(S, 'presentationPage', 'Présentation', SANITY_SINGLETON_IDS.presentationPage),
-      singletonListItem(S, 'contactPage', 'Contact', SANITY_SINGLETON_IDS.contactPage),
+
+      // ===== CRÉATIONS =====
+      S.listItem()
+        .title(‘🎭 CRÉATIONS (Spectacles & Projets)’)
+        .id(‘creations’)
+        .child(S.documentTypeList(‘project’).title(‘🎭 Créations’)),
+
       S.divider(),
-      ...S.documentTypeListItems().filter(
-        item => !['siteSettings', 'navigation', 'footerContent', 'homePage', 'presentationPage', 'contactPage'].includes(item.getId() || ''),
-      ),
+
+      // ===== CONFIGURATION =====
+      S.listItem()
+        .title(‘⚙️ CONFIGURATION DU SITE’)
+        .id(‘config-groupe’)
+        .child(
+          S.list()
+            .title(‘Configuration’)
+            .items([
+              singletonListItem(
+                S,
+                ‘navigation’,
+                ‘🔗 Menu de navigation (haut du site)’,
+                SANITY_SINGLETON_IDS.navigation,
+              ),
+              singletonListItem(
+                S,
+                ‘footerContent’,
+                ‘👣 Pied de page’,
+                SANITY_SINGLETON_IDS.footerContent,
+              ),
+              singletonListItem(
+                S,
+                ‘siteSettings’,
+                ‘🔍 Référencement & SEO’,
+                SANITY_SINGLETON_IDS.siteSettings,
+              ),
+            ]),
+        ),
     ])

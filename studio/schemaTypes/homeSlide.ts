@@ -1,41 +1,46 @@
 import { defineField, defineType } from 'sanity'
 
 export const homeSlideType = defineType({
-  name: 'homeSlide',
-  title: 'Diapositive accueil',
-  type: 'object',
+  name: ‘homeSlide’,
+  title: ‘📸 Photo du carrousel’,
+  type: ‘object’,
+  description: ‘Une photo qui défile dans le carrousel de la page d\’accueil.’,
   fields: [
     defineField({
-      name: 'image',
-      title: 'Image',
-      type: 'image',
+      name: ‘image’,
+      title: ‘📸 Image’,
+      description:
+        ‘JPG ou PNG. Format: paysage recommandé (16:9). Min 1920px de large. Conseil: éviter les photos coupées au bord du cadre — cadrer avec marges.’,
+      type: ‘image’,
       options: { hotspot: true },
       validation: Rule => Rule.required(),
     }),
     defineField({
-      name: 'objectFit',
-      title: 'Recadrage',
-      type: 'string',
+      name: ‘objectFit’,
+      title: ‘🖼️ Comment afficher la photo’,
+      type: ‘string’,
       options: {
         list: [
-          { title: 'Couvrir (remplir)', value: 'cover' },
-          { title: 'Contenir (bandes)', value: 'contain' },
+          { title: ‘Remplir tout le cadre (peut couper les bords)’, value: ‘cover’ },
+          { title: ‘Voir la photo entière (bandes blanches possibles)’, value: ‘contain’ },
         ],
-        layout: 'radio',
+        layout: ‘radio’,
       },
-      initialValue: 'cover',
+      initialValue: ‘cover’,
     }),
     defineField({
-      name: 'objectPosition',
-      title: 'Position (CSS, ex. center 20%)',
-      type: 'string',
-      initialValue: 'center',
+      name: ‘objectPosition’,
+      title: ‘📍 Cadrage (optionnel)’,
+      description:
+        ‘Défaut: centre. Exemples: « center top » pour le haut, « center 20% » pour baisser le centre.’,
+      type: ‘string’,
+      initialValue: ‘center’,
     }),
   ],
   preview: {
     select: { media: 'image' },
     prepare({ media }) {
-      return { title: 'Image accueil', media }
+      return { title: 'Photo accueil', subtitle: 'Glisser dans la liste pour l’ordre', media }
     },
   },
 })

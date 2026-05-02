@@ -1,40 +1,38 @@
-import { defineField, defineType } from 'sanity'
+import { defineField, defineType } from ‘sanity’
 
-/**
- * Un bloc galerie : l’équipe peut réordonner (poignées ⋮⋮), remplacer l’image,
- * ajouter légende / crédit pour l’accessibilité et les mentions photo.
- */
 export const galleryItemType = defineType({
-  name: 'galleryItem',
-  title: 'Image',
-  type: 'object',
+  name: ‘galleryItem’,
+  title: ‘📸 Image de galerie’,
+  type: ‘object’,
+  description: ‘Une photo de la galerie d\’un spectacle. Vous pouvez ajouter un crédit photographe et description.’,
   fields: [
     defineField({
-      name: 'photo',
-      title: 'Image',
-      type: 'image',
+      name: ‘photo’,
+      title: ‘📸 Image’,
+      description: ‘JPG/PNG. Min 1200x800px. Doit être en bonne qualité!’,
+      type: ‘image’,
       options: { hotspot: true },
       validation: Rule => Rule.required(),
     }),
     defineField({
-      name: 'alt',
-      title: 'Description courte',
-      description: 'Pour les lecteurs d’écran et le référencement (optionnel mais recommandé).',
-      type: 'string',
+      name: ‘alt’,
+      title: ‘📝 Description courte’,
+      description: ‘Pour les lecteurs d\’écran et le SEO (ce qui se passe sur la photo). Optionnel mais recommandé.’,
+      type: ‘string’,
     }),
     defineField({
-      name: 'credit',
-      title: 'Crédit photographe',
-      description: 'Ex. Ysé, Arthur, Thomas Brena…',
-      type: 'string',
+      name: ‘credit’,
+      title: ‘📷 Crédit photographe’,
+      description: ‘Nom du/des photographe(s). Ex: « Ysé Michels », « Arthur Dhahri & Ysé »’,
+      type: ‘string’,
     }),
   ],
   preview: {
-    select: { media: 'photo', title: 'credit', subtitle: 'alt' },
+    select: { media: ‘photo’, title: ‘credit’, subtitle: ‘alt’ },
     prepare({ media, title, subtitle }) {
       return {
-        title: title || 'Image',
-        subtitle: subtitle || ' ',
+        title: title || ‘Image’,
+        subtitle: subtitle || ‘ ‘,
         media,
       }
     },

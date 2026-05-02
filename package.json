@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "studio": "npm run dev --prefix studio",
-    "seed:sanity": "node scripts/seed-sanity.mjs"
+    "seed:sanity": "node scripts/seed-sanity.mjs",
+    "seed:singletons": "node scripts/seed-singletons.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
