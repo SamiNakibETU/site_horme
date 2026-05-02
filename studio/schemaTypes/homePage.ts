@@ -1,104 +1,148 @@
 import { defineField, defineType } from 'sanity'
 
 /**
- * Page d’accueil : groupes numérotés pour guider les éditeurs non techniques.
+ * PAGE D'ACCUEIL - Première page que les visiteurs voient
+ *
+ * Structure visuelle (de haut en bas):
+ * 1. HÉRO: Vidéo de fond + Grand titre "Cie. Horme"
+ * 2. CARROUSEL: Photos qui défilent horizontalement (photos de GROUPE uniquement - PAS de solos!)
+ * 3. MANIFESTO: Bandeau bleu "Le corps comme [BLEU]langage premier[/BLEU]"
+ * 4. PRÉSENTATION: Texte principal sur la compagnie
+ * 5. PHOTOS SECTION: Encart qui renvoie à la page Présentation
+ * 6. CRÉATIONS: Liste des spectacles
  */
 export const homePageType = defineType({
-  name: ‘homePage’,
-  title: ‘🏠 Page d’accueil’,
-  type: ‘document’,
+  name: 'homePage',
+  title: '🏠 Page d'Accueil',
+  type: 'document',
   description:
-    ‘👋 Bienvenue! Vous modifiez la première page que les visiteurs voient. Les changements s\’affichent après clic sur **Publier** (en haut à droite). Les photos doivent être de bonne qualité et pas coupées (format paysage préféré). Besoin d\’aide? Cliquez sur le ❓ à côté de chaque champ!’,
+    '👋 Bienvenue! Vous modifiez la première page que les visiteurs voient. ' +
+    'Cette page a 6 sections visibles. Les changements s\'affichent après clic sur **Publier** (en haut à droite).',
   groups: [
-    { name: ‘hero’, title: ‘1️⃣ Vidéo + titre en haut’, default: true },
-    { name: ‘carousel’, title: ‘2️⃣ Photos qui défilent’ },
-    { name: ‘manifesto’, title: ‘3️⃣ Bandeau « Le corps comme… »’ },
-    { name: ‘intro’, title: ‘4️⃣ Section « La compagnie »’ },
-    { name: ‘imagesBloc’, title: ‘5️⃣ Encart « Photos »’ },
-    { name: ‘creations’, title: ‘6️⃣ Section « Créations »’ },
+    { name: 'hero', title: '1️⃣ HÉRO - Vidéo & Grand Titre', default: true },
+    { name: 'carousel', title: '2️⃣ CARROUSEL - Photos de groupe qui défilent' },
+    { name: 'manifesto', title: '3️⃣ MANIFESTO - Bandeau bleu inspirant' },
+    { name: 'intro', title: '4️⃣ PRÉSENTATION - Texte sur la compagnie' },
+    { name: 'imagesBloc', title: '5️⃣ ENCART PHOTOS - Renvoie à la page Présentation' },
+    { name: 'creations', title: '6️⃣ CRÉATIONS - Titres avant la liste des spectacles' },
   ],
   fields: [
+    // ============= SECTION 1: HERO =============
     defineField({
       name: 'heroVideo',
-      title: '🎬 Vidéo en plein écran',
-      description: 'La vidéo de fond de la page d\'accueil. Formats acceptés: MP4, WebM. Conseil: moins de 50MB pour charger vite. Si pas de vidéo, une photo s\'affiche à la place.',
+      title: '🎬 Vidéo de fond',
+      description:
+        'La vidéo qui s\'affiche en plein écran derrière le titre. ' +
+        'Formats: MP4, WebM. Moins de 50MB. ' +
+        'Astuce: Si pas de vidéo, une photo s\'affiche à la place.',
       type: 'file',
       options: { accept: 'video/*' },
       group: 'hero',
     }),
     defineField({
       name: 'heroTitle',
-      title: 'Grand titre (ex. Cie. Horme)',
+      title: '✍️ Grand titre principal',
+      description:
+        'Le texte énorme au bas de l\'écran. Ex: "Cie. Horme"',
       type: 'string',
-      initialValue: 'Cie. Horme',
+      initialValue: '',
+      validation: Rule => Rule.required(),
       group: 'hero',
     }),
     defineField({
       name: 'heroLine1',
-      title: 'Sous-titre — ligne 1',
+      title: '📝 Sous-titre — ligne 1',
+      description:
+        'Petite ligne sous le titre. Ex: "Louise Melli et Joséphine Hassid-Langlois"',
       type: 'string',
-      initialValue: 'Louise Melli et Joséphine Hassid-Langlois',
+      initialValue: '',
       group: 'hero',
     }),
     defineField({
       name: 'heroLine2',
-      title: 'Sous-titre — ligne 2',
+      title: '📝 Sous-titre — ligne 2',
+      description:
+        'Deuxième ligne optionnelle. Ex: "écriture chorégraphique, Paris."',
       type: 'string',
-      initialValue: 'écriture chorégraphique, Paris.',
+      initialValue: '',
       group: 'hero',
     }),
+
+    // ============= SECTION 2: CAROUSEL =============
     defineField({
-      name: ‘slides’,
-      title: ‘📸 Photos qui défilent (carrousel)’,
+      name: 'slides',
+      title: '📸 Photos du carrousel',
       description:
-        ‘⭐ IMPORTANT: Cliquez « Ajouter » pour chaque photo. **GLISSEZ** (icône ⋮⋮ à gauche) pour changer l\’ordre. ❌ ATTENTION: Supprimer toutes les photos redonne les photos par défaut. Conseil: utiliser photos en paysage (16:9), min 1920px de large, format JPG/PNG.’,
-      type: ‘array’,
-      of: [{ type: ‘homeSlide’ }],
-      group: ‘carousel’,
+        '⚠️ **PHOTOS DE GROUPE UNIQUEMENT!** ' +
+        'PAS de photos de personnes seules ici (elles vont en Présentation). ' +
+        '\n\n💡 Comment ajouter:\n' +
+        '1. Cliquez « Ajouter »\n' +
+        '2. Sélectionnez une photo de groupe\n' +
+        '3. **GLISSEZ** (icône ⋮⋮ à gauche) pour changer l\'ordre\n' +
+        '4. Cliquez « Publier »\n\n' +
+        '📌 Conseils: format paysage 16:9, min 1920px, JPG/PNG, pas coupées aux bords.',
+      type: 'array',
+      of: [{ type: 'homeSlide' }],
+      group: 'carousel',
+      validation: Rule => Rule.min(1).warning('Ajoutez au moins 1 photo de groupe!'),
     }),
+
+    // ============= SECTION 3: MANIFESTO =============
     defineField({
       name: 'manifestoLine1',
       title: '✍️ Texte avant le mot bleu',
-      description: 'Ex: « Le corps comme »',
+      description:
+        'Première partie de la phrase inspirante. Ex: "Le corps comme"',
       type: 'string',
       initialValue: '',
       group: 'manifesto',
     }),
     defineField({
       name: 'manifestoAccent',
-      title: '💙 Mot ou phrase en bleu',
-      description: 'Ce mot/phrase s\'affiche en bleu et en gros. Ex: « langage premier »',
+      title: '💙 Mot/phrase EN BLEU',
+      description:
+        'Ce mot s\'affiche en BLEU et EN GROS sur le site. Ex: "langage premier."',
       type: 'string',
       initialValue: '',
       group: 'manifesto',
     }),
     defineField({
       name: 'manifestoCtaLabel',
-      title: 'Texte du lien (vers la page Créations)',
+      title: '🔗 Texte du lien',
+      description:
+        'Le bouton qui renvoie à la page des créations. Ex: "Voir les créations →"',
       type: 'string',
-      initialValue: 'Voir les créations →',
+      initialValue: '',
       group: 'manifesto',
     }),
+
+    // ============= SECTION 4: INTRO/PRÉSENTATION =============
     defineField({
       name: 'introKicker',
       title: '🏷️ Petit titre (surtitre)',
+      description:
+        'Texte gris clair au-dessus du texte principal. Ex: "La compagnie"',
       type: 'string',
       initialValue: '',
       group: 'intro',
     }),
     defineField({
       name: 'introParagraph1',
-      title: '📝 Texte principal',
-      description: 'Le texte principal qui présente la compagnie. Peut être long (plusieurs phrases).',
+      title: '📝 Texte principal (paragraphe 1)',
+      description:
+        'Le TEXTE IMPORTANT qui présente la compagnie. Peut être long (plusieurs phrases). ' +
+        'C\'est le cœur de la présentation en accueil. Visible pour tous les visiteurs!',
       type: 'text',
-      rows: 5,
+      rows: 6,
       initialValue: '',
       group: 'intro',
     }),
     defineField({
       name: 'introParagraph2',
-      title: '📝 Texte secondaire',
-      description: 'Un texte plus court, plus léger. S\'affiche en gris clair.',
+      title: '📝 Texte secondaire (paragraphe 2)',
+      description:
+        'Un texte PLUS COURT et plus léger. S\'affiche en gris clair. ' +
+        'Ex: une phrase poétique ou une info complémentaire.',
       type: 'text',
       rows: 4,
       initialValue: '',
@@ -106,14 +150,20 @@ export const homePageType = defineType({
     }),
     defineField({
       name: 'introCtaLabel',
-      title: 'Texte du lien vers Présentation',
+      title: '🔗 Texte du lien',
+      description:
+        'Bouton vers la page Présentation pour découvrir les danseuses. Ex: "Découvrir la compagnie →"',
       type: 'string',
-      initialValue: 'Découvrir la compagnie →',
+      initialValue: '',
       group: 'intro',
     }),
+
+    // ============= SECTION 5: PHOTOS ENCART =============
     defineField({
       name: 'imagesSectionKicker',
-      title: '🏷️ Titre de la section photos',
+      title: '🏷️ Titre de la section',
+      description:
+        'Titre du petit encart photos. Ex: "La compagnie en images"',
       type: 'string',
       initialValue: '',
       group: 'imagesBloc',
@@ -121,7 +171,9 @@ export const homePageType = defineType({
     defineField({
       name: 'imagesSectionBody',
       title: '📝 Description',
-      description: 'Un court texte expliquant ce que le visiteur verra en cliquant.',
+      description:
+        'Court texte décrivant ce qu\'on verra en cliquant sur cet encart. ' +
+        'Ex: "Retrouvez les portraits et la vie de la compagnie."',
       type: 'text',
       rows: 3,
       initialValue: '',
@@ -129,23 +181,31 @@ export const homePageType = defineType({
     }),
     defineField({
       name: 'imagesSectionCtaLabel',
-      title: 'Texte du lien',
+      title: '🔗 Texte du lien',
+      description:
+        'Bouton pour aller à la page Présentation. Ex: "Présentation →"',
       type: 'string',
-      initialValue: 'Présentation →',
+      initialValue: '',
       group: 'imagesBloc',
     }),
+
+    // ============= SECTION 6: CRÉATIONS =============
     defineField({
       name: 'creationsKicker',
-      title: '🏷️ Titre de la section créations',
+      title: '🏷️ Titre de la section',
+      description:
+        'Titre avant la liste des spectacles/créations. Ex: "Créations"',
       type: 'string',
       initialValue: '',
       group: 'creations',
     }),
     defineField({
       name: 'creationsFooterCtaLabel',
-      title: 'Lien du bas (« Toutes les créations »)',
+      title: '🔗 Lien du bas',
+      description:
+        'Bouton pour voir toutes les créations. Ex: "Toutes les créations →"',
       type: 'string',
-      initialValue: 'Toutes les créations →',
+      initialValue: '',
       group: 'creations',
     }),
   ],

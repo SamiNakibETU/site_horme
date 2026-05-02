@@ -1,46 +1,53 @@
 import { defineField, defineType } from 'sanity'
 
 export const homeSlideType = defineType({
-  name: ‘homeSlide’,
-  title: ‘📸 Photo du carrousel’,
-  type: ‘object’,
-  description: ‘Une photo qui défile dans le carrousel de la page d\’accueil.’,
+  name: 'homeSlide',
+  title: '📸 Photo du Carrousel (Accueil)',
+  type: 'object',
+  description: 'Une photo de groupe qui défile dans le carrousel de la page d\'accueil.',
   fields: [
     defineField({
-      name: ‘image’,
-      title: ‘📸 Image’,
+      name: 'image',
+      title: '📸 Image',
       description:
-        ‘JPG ou PNG. Format: paysage recommandé (16:9). Min 1920px de large. Conseil: éviter les photos coupées au bord du cadre — cadrer avec marges.’,
-      type: ‘image’,
+        '✅ FORMAT PAYSAGE (16:9) RECOMMANDÉ\n' +
+        'Min 1920px de large. JPG ou PNG. PAS coupée aux bords!' ,
+      type: 'image',
       options: { hotspot: true },
       validation: Rule => Rule.required(),
     }),
     defineField({
-      name: ‘objectFit’,
-      title: ‘🖼️ Comment afficher la photo’,
-      type: ‘string’,
+      name: 'objectFit',
+      title: '🖼️ Comment afficher la photo',
+      description:
+        '- "Remplir": la photo remplit tout l\'écran (peut couper les bords)\n' +
+        '- "Voir entière": on voit la photo complète (peut avoir des bandes blanches)',
+      type: 'string',
       options: {
         list: [
-          { title: ‘Remplir tout le cadre (peut couper les bords)’, value: ‘cover’ },
-          { title: ‘Voir la photo entière (bandes blanches possibles)’, value: ‘contain’ },
+          { title: 'Remplir tout le cadre (peut couper les bords)', value: 'cover' },
+          { title: 'Voir la photo entière (bandes blanches possibles)', value: 'contain' },
         ],
-        layout: ‘radio’,
+        layout: 'radio',
       },
-      initialValue: ‘cover’,
+      initialValue: 'cover',
     }),
     defineField({
-      name: ‘objectPosition’,
-      title: ‘📍 Cadrage (optionnel)’,
+      name: 'objectPosition',
+      title: '📍 Cadrage (optionnel)',
       description:
-        ‘Défaut: centre. Exemples: « center top » pour le haut, « center 20% » pour baisser le centre.’,
-      type: ‘string’,
-      initialValue: ‘center’,
+        'Si vous choisissez "Remplir", vous pouvez choisir où centrer.\n' +
+        'Défaut: "center" (centre). Autres exemples:\n' +
+        '- "center top" = montre le haut\n' +
+        '- "center 20%" = monte un peu le sujet',
+      type: 'string',
+      initialValue: 'center',
     }),
   ],
   preview: {
     select: { media: 'image' },
     prepare({ media }) {
-      return { title: 'Photo accueil', subtitle: 'Glisser dans la liste pour l’ordre', media }
+      return { title: 'Photo du carrousel', subtitle: 'Glisser pour changer l\'ordre', media }
     },
   },
 })
