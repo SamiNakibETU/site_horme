@@ -34,7 +34,8 @@ export const homePageType = defineType({
       description:
         'La vidéo qui s\'affiche en plein écran derrière le titre. ' +
         'Formats: MP4, WebM. Moins de 50MB. ' +
-        'Astuce: Si pas de vidéo, une photo s\'affiche à la place.',
+        'Astuce: Si pas de vidéo, une photo s\'affiche à la place.\n\n' +
+        '👀 PREVIEW: Vous verrez la vidéo chargée ici après upload.',
       type: 'file',
       options: { accept: 'video/*' },
       group: 'hero',

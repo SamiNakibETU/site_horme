@@ -1,29 +1,25 @@
 import { defineField, defineType } from 'sanity'
 
-/**
- * DANSEUSE / PORTRAIT
- *
- * Un portrait avec:
- * - Photo carrée du visage
- * - Nom
- * - Rôle/titre
- * - Biographies (2 blocs flexibles)
- * - Formation/parcours
- */
 export const presentationDancerType = defineType({
   name: 'presentationDancer',
-  title: '👤 Danseuse / Portrait',
+  title: '👤 Danseuse / Portrait SEUL',
   type: 'object',
   description:
-    'Un portrait de danseuse avec photo, bio et infos. ' +
-    'Utilisez pour Louise, Joséphine, et autres membres de la compagnie.',
+    '👤 C\'EST ICI les photos DE PERSONNES SEULES! ' +
+    'PAS en accueil! Portrait + biographie d\'une danseuse.',
   fields: [
     defineField({
       name: 'portrait',
-      title: '📸 Photo portrait',
+      title: '📸 Photo portrait SEULE (carrée)',
       description:
-        'Photo CARRÉE du visage. Format: 800x800px min, JPG/PNG. ' +
-        'Bien cadrée sur le visage, pas coupée. Cette photo s\'affiche seule en page Présentation.',
+        '✅ PHOTOS DE PERSONNES SEULES UNIQUEMENT!\n' +
+        '  (Les groupes vont en accueil carrousel)\n\n' +
+        '📐 Format: 800x800px MINIMUM\n' +
+        '  Aspect: CARRÉ (1:1)\n' +
+        '  Type: JPG ou PNG\n\n' +
+        '✨ Bien cadrée sur le visage\n' +
+        '  NE DOIT PAS être coupée!\n' +
+        '  Utilise "hotspot" si besoin de cadrer',
       type: 'image',
       options: { hotspot: true },
       validation: Rule => Rule.required(),
@@ -39,16 +35,16 @@ export const presentationDancerType = defineType({
       name: 'role',
       title: '🏷️ Rôle / Titre',
       description:
-        'Fonction ou titre. Ex: "Co-fondatrice, chorégraphe", "Danseuse interprète", "Artiste'
-        ' associée"',
+        'Fonction. Ex: "Co-fondatrice, chorégraphe", ' +
+        '"Danseuse interprète", "Artiste associée"',
       type: 'string'
     }),
     defineField({
       name: 'bio1',
       title: '📝 Biographie — Bloc 1',
       description:
-        'Premier bloc de bio. Parlez du parcours, style, influences, expériences. ' +
-        'Peut être plusieurs lignes!',
+        'Parcours, style, influences, expériences. ' +
+        'Peut être plusieurs lignes! Raconte son histoire!',
       type: 'text',
       rows: 6
     }),
@@ -56,21 +52,21 @@ export const presentationDancerType = defineType({
       name: 'bio2',
       title: '📝 Biographie — Bloc 2',
       description:
-        'Deuxième bloc (optionnel). Suite de la bio ou infos complémentaires.',
+        'Suite optionnelle. Infos complémentaires ou témoignages.',
       type: 'text',
       rows: 6
     }),
     defineField({
       name: 'formationTitle',
-      title: '🏷️ Titre de la section formation',
-      description: 'Ex: "Formation", "Cursus", "Parcours"',
+      title: '🏷️ Titre section formation',
+      description: 'Ex: "Formation", "Cursus", "Parcours pédagogique"',
       type: 'string',
       initialValue: '',
     }),
     defineField({
       name: 'formationText',
-      title: '📝 Texte formation',
-      description: 'École, cursus, influences, pratiques. Tout ce qui raconte son apprentissage.',
+      title: '📝 Texte formation/cursus',
+      description: 'École, danse classique/contemporaine, influences, pratiques...',
       type: 'text',
       rows: 4
     }),
@@ -78,7 +74,11 @@ export const presentationDancerType = defineType({
   preview: {
     select: { title: 'name', media: 'portrait' },
     prepare({ title, media }) {
-      return { title: title || 'Portrait', media }
+      return {
+        title: title ? `👤 ${title}` : '👤 Portrait',
+        subtitle: '(Photo seule)',
+        media,
+      }
     },
   },
 })

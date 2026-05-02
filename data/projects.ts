@@ -92,4 +92,17 @@ export const projects: Project[] = [
       '/assets/images/jardiniers/10.jpg',
     ],
   },
+  {
+    slug: 'theatre-douze',
+    title: 'Théâtre Douze',
+    type: 'Événement',
+    year: 2025,
+    location: 'Théâtre Douze, Paris',
+    photographer: ['À compléter'],
+    description: 'À compléter par la compagnie.',
+    coverImage: '/assets/images/theatre-douze/cover.jpg',
+    images: [
+      '/assets/images/theatre-douze/01.jpg',
+    ],
+  },
 ]
