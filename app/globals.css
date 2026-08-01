@@ -178,8 +178,16 @@ body {
   to   { opacity: 1; }
 }
 
+/* Pas de `both` : l'état par défaut de l'image est visible. Si l'animation ne
+   se déclenche pas, on voit la photo au lieu d'un cadre vide. */
 .gallery-photo {
-  animation: photoIn 420ms var(--ease-out) both;
+  animation: photoIn 420ms var(--ease-out);
+}
+
+/* La planche-contact occupe exactement la hauteur de l'écran : on masque le
+   pied de page global, qui réintroduirait un défilement sur cette page. */
+body:has(.gallery-fullscreen) > footer {
+  display: none;
 }
 
 /* Légende d'image, façon planche documentaire. */

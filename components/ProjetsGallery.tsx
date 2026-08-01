@@ -68,6 +68,7 @@ export default function ProjetsGallery({ projects }: { projects: Project[] }) {
   return (
     <div
       data-nav-theme="light"
+      className="gallery-fullscreen"
       onClick={next}
       style={{
         position: 'relative',
