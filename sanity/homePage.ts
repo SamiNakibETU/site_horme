@@ -32,13 +32,35 @@ export const homePageType = defineType({
       name: 'heroVideo',
       title: '🎬 Vidéo de fond',
       description:
-        'La vidéo qui s\'affiche en plein écran derrière le titre. ' +
-        'Formats: MP4, WebM. Moins de 50MB. ' +
-        'Astuce: Si pas de vidéo, une photo s\'affiche à la place.\n\n' +
-        '👀 PREVIEW: Vous verrez la vidéo chargée ici après upload.',
+        'La vidéo plein écran derrière le titre. La vidéo est muette : ' +
+        'le son ne sera pas joué.\n\n' +
+        '⚠️ Format obligatoire : MP4 en H.264. Une vidéo venant directement ' +
+        'd’un iPhone, de Final Cut ou d’iMovie est en général en HEVC (H.265) — ' +
+        'ce format s’affiche correctement sur Mac et iPhone, mais reste ' +
+        '**invisible sur Chrome, Firefox et Android**, soit la majorité des ' +
+        'visiteurs. Vous ne verriez donc pas le problème depuis votre ordinateur.\n\n' +
+        'Dans le doute, envoyez la vidéo à Sami pour conversion, ou exportez ' +
+        'en « H.264 / MP4 » depuis votre logiciel de montage.\n\n' +
+        'Poids conseillé : moins de 5 Mo.',
       type: 'file',
-      options: { accept: 'video/*' },
+      options: { accept: 'video/mp4' },
       group: 'hero',
+    }),
+    defineField({
+      name: 'heroPoster',
+      title: '🖼️ Image affichée pendant le chargement de la vidéo',
+      description:
+        'Une vidéo met quelques secondes à arriver. Cette image s’affiche ' +
+        'immédiatement à sa place, puis s’efface dès que la vidéo démarre. ' +
+        'Sans elle, les visiteurs voient un rectangle vide en arrivant sur le site.\n\n' +
+        'Choisissez de préférence une image proche de la première seconde de la vidéo.',
+      type: 'image',
+      options: { hotspot: true },
+      group: 'hero',
+      validation: Rule =>
+        Rule.required().warning(
+          'Sans image de chargement, la page d’accueil s’ouvre sur un écran vide.',
+        ),
     }),
     defineField({
       name: 'heroTitle',

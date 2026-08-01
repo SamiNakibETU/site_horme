@@ -9,6 +9,7 @@
     "lint": "next lint",
     "studio:deploy": "sanity deploy",
     "content:backup": "sanity dataset export production backups/production.tar.gz",
+    "encode:video": "node scripts/encode-video.mjs",
     "seed:sanity": "node scripts/seed-sanity.mjs",
     "seed:singletons": "node scripts/seed-singletons.mjs"
   },
@@ -26,6 +27,7 @@
     "styled-components": "^6.4.4"
   },
   "devDependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@sanity/vision": "^3.62.3",
     "@types/node": "^20",
     "@types/react": "^18",

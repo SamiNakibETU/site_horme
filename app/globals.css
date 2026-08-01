@@ -26,6 +26,11 @@
   --blue:    #1C4CF4;
   --black:   #0A0A0A;
   --gutter:  clamp(1.5rem, 4vw, 4rem);
+
+  /* Courbes d'accélération. Les easings natifs du navigateur sont trop mous :
+     ils n'ont pas le mordant qui fait lire une animation comme intentionnelle. */
+  --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 /* Logo theme filters */
@@ -43,6 +48,19 @@ body {
   color: var(--black);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+}
+
+/* ─── Révélation au défilement ────────────────────────────────────────────────
+   L'état initial est posé ici, en CSS, et non par GSAP au montage. Sinon le
+   contenu s'affiche au premier rendu puis disparaît quand le script s'exécute :
+   un flash visible sur connexion lente.
+
+   `.js-ready` est ajouté sur <html> par ScrollAnimations dès son montage. Tant
+   qu'il est absent — JS lent, en erreur, ou désactivé — les éléments restent
+   pleinement visibles. Le contenu ne dépend jamais du JavaScript. */
+html.js-ready [data-animate='fade-up'] {
+  opacity: 0;
+  transform: translateY(40px);
 }
 
 .reveal-word {
@@ -193,4 +211,65 @@ body {
 @keyframes swipeArrow {
   0%, 100% { transform: translateX(0); opacity: 0.4; }
   50% { transform: translateX(5px); opacity: 1; }
+}
+
+/* ─── Héro ────────────────────────────────────────────────────────────────────
+   Le titre était masqué en `opacity: 0` inline puis révélé par GSAP : sans
+   JavaScript, il ne s'affichait jamais. Ici l'animation est en CSS pure et
+   `forwards` fige l'état final — l'état par défaut du HTML reste visible. */
+@keyframes heroReveal {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero-reveal {
+  animation: heroReveal 1.2s var(--ease-out) 0.3s both;
+}
+
+/* ─── Survol ──────────────────────────────────────────────────────────────────
+   Sur écran tactile, :hover se déclenche au toucher et reste actif après le
+   relâchement. On réserve les effets de survol aux vrais pointeurs. */
+@media (hover: hover) and (pointer: fine) {
+  a:hover,
+  button:hover {
+    transition: opacity 200ms var(--ease-out), color 200ms var(--ease-out);
+  }
+}
+
+/* Retour au pressé : l'interface doit accuser réception du clic. */
+a:active,
+button:active {
+  transform: scale(0.98);
+}
+a, button {
+  transition: transform 160ms var(--ease-out);
+}
+
+/* ─── Mouvement réduit ────────────────────────────────────────────────────────
+   Préférence système déclarée par les personnes sujettes au mal des transports
+   ou aux troubles vestibulaires. On supprime les déplacements, on garde les
+   fondus : ceux-ci aident à comprendre les changements d'état sans provoquer
+   de gêne. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html.js-ready [data-animate='fade-up'] {
+    opacity: 1;
+    transform: none;
+  }
+
+  .hero-reveal {
+    animation: none;
+  }
+
+  .reveal-word span {
+    transform: none;
+  }
 }

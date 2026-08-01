@@ -394,16 +394,6 @@ function slidesFromCms(home: HomePageCms): CinematicSlide[] {
 
 export default function HomePage({ projects, home }: { projects: Project[]; home: HomePageCms }) {
   const slideshowSlides = slidesFromCms(home)
-  const heroTextRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (heroTextRef.current) {
-      gsap.fromTo(heroTextRef.current,
-        { opacity: 0, y: 40 },
-        { opacity: 1, y: 0, duration: 1.2, delay: 0.3, ease: 'power3.out' }
-      )
-    }
-  }, [])
 
   return (
     <main style={{
@@ -420,13 +410,20 @@ export default function HomePage({ projects, home }: { projects: Project[]; home
         data-nav-theme="dark"
         style={{ position: 'relative', height: '100dvh', overflow: 'hidden', background: '#000' }}
       >
+        {/* `preload="metadata"` et non "auto" : la vidéo pèse plusieurs Mo et,
+            en "auto", le navigateur la télécharge intégralement avant tout le
+            reste — polices et images comprises. Le poster s'affiche
+            instantanément pendant qu'elle se charge, au lieu d'un aplat vide. */}
         <video
           autoPlay
           loop
           muted
           playsInline
-          preload="auto"
+          preload="metadata"
+          poster={home.heroPosterUrl || undefined}
           src={home.heroVideoUrl}
+          aria-hidden="true"
+          tabIndex={-1}
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
         />
         <div style={{
@@ -435,12 +432,11 @@ export default function HomePage({ projects, home }: { projects: Project[]; home
           pointerEvents: 'none',
         }} />
 
-        <div ref={heroTextRef} style={{
+        <div className="hero-reveal" style={{
           position: 'absolute',
           bottom: 'clamp(2rem, 5vw, 3rem)',
           left: 'var(--gutter)',
           right: 'var(--gutter)',
-          opacity: 0,
         }}>
           <h1 style={{
             fontFamily: 'Ribes, Georgia, serif',

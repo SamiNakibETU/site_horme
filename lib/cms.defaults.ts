@@ -51,6 +51,7 @@ export const defaultFooter: FooterCms = {
 
 export const defaultHomePage: HomePageCms = {
   heroVideoUrl: '/assets/videos/hero.mp4',
+  heroPosterUrl: '/assets/images/hero-poster.jpg',
   heroTitle: 'Cie. Horme',
   heroLine1: 'Louise Melli et Joséphine Hassid-Langlois',
   heroLine2: 'écriture chorégraphique, Paris.',

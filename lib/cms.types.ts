@@ -40,6 +40,8 @@ export type HomeSlideCms = {
 
 export type HomePageCms = {
   heroVideoUrl: string
+  /** Image affichée pendant le chargement de la vidéo du héro. */
+  heroPosterUrl: string
   heroTitle: string
   heroLine1: string
   heroLine2: string

@@ -50,6 +50,7 @@ const qFooter = `*[_id == $id][0]{
 
 const qHome = `*[_id == $id][0]{
   "heroVideoUrl": coalesce(heroVideo.asset->url, ""),
+  "heroPosterUrl": coalesce(heroPoster.asset->url, ""),
   heroTitle,
   heroLine1,
   heroLine2,
@@ -112,6 +113,7 @@ function mergeHome(row: Record<string, unknown> | null): HomePageCms {
   }))
   return {
     heroVideoUrl: (row.heroVideoUrl as string) || d.heroVideoUrl,
+    heroPosterUrl: (row.heroPosterUrl as string) || d.heroPosterUrl,
     heroTitle: (row.heroTitle as string) || d.heroTitle,
     heroLine1: (row.heroLine1 as string) || d.heroLine1,
     heroLine2: (row.heroLine2 as string) || d.heroLine2,
