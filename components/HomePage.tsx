@@ -249,24 +249,28 @@ function AnimatedText({ children, delay = 0 }: {
   useEffect(() => {
     const el = ref.current
     if (!el) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-    gsap.fromTo(el,
-      { opacity: 0, y: 30 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.55,
-        delay,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: el,
-          start: 'top 85%',
+    const ctx = gsap.context(() => {
+      gsap.fromTo(el,
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.55,
+          delay,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: el, start: 'top 85%' },
         },
-      }
-    )
+      )
+    })
+    return () => ctx.revert()
   }, [delay])
 
-  return <div ref={ref} style={{ opacity: 0 }}>{children}</div>
+  // Pas d'`opacity: 0` inline : sans JavaScript — ou si GSAP échoue — le texte
+  // resterait invisible. L'état masqué est posé par le CSS sous `.js-ready`,
+  // classe que ScrollAnimations n'ajoute que s'il va réellement animer.
+  return <div ref={ref} data-animate-text>{children}</div>
 }
 
 function ProjectList({ projects }: { projects: Project[] }) {

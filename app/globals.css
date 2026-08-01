@@ -63,6 +63,10 @@ html.js-ready [data-animate='fade-up'] {
   transform: translateY(40px);
 }
 
+html.js-ready [data-animate-text] {
+  opacity: 0;
+}
+
 .reveal-word {
   display: inline-block;
   overflow: hidden;

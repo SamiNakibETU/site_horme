@@ -31,6 +31,7 @@ export default function Navbar({ navigation }: { navigation: NavigationCms }) {
   }
   const pathname = usePathname()
   const [navTheme, setNavTheme] = useState<'light' | 'dark'>('dark')
+  const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [creationOpen, setCreationOpen] = useState(false)
   const [mobileCreationOpen, setMobileCreationOpen] = useState(false)
@@ -53,6 +54,12 @@ export default function Navbar({ navigation }: { navigation: NavigationCms }) {
         }
       })
       setNavTheme(currentTheme)
+
+      // La barre est fixe et sans fond : au-delà du héro, le contenu de la page
+      // défile dessous et les textes se superposent aux liens. On fait donc
+      // apparaître un voile dès qu'on quitte le haut de page — et seulement là,
+      // pour que le héro reste plein cadre.
+      setScrolled(window.scrollY > 24)
     }
 
     window.addEventListener('scroll', updateTheme, { passive: true })
@@ -101,7 +108,26 @@ export default function Navbar({ navigation }: { navigation: NavigationCms }) {
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '0.75rem var(--gutter)',
-          transition: 'all 0.4s ease',
+          // Voile translucide accordé au thème de la section survolée. Absent en
+          // haut de page pour laisser la vidéo du héro occuper tout le cadre.
+          background: scrolled
+            ? isDark
+              ? 'rgba(10,10,10,0.55)'
+              : 'rgba(255,255,255,0.72)'
+            : 'transparent',
+          backdropFilter: scrolled ? 'blur(14px) saturate(180%)' : 'none',
+          WebkitBackdropFilter: scrolled ? 'blur(14px) saturate(180%)' : 'none',
+          borderBottom: `1px solid ${
+            scrolled
+              ? isDark
+                ? 'rgba(255,255,255,0.08)'
+                : 'rgba(10,10,10,0.06)'
+              : 'transparent'
+          }`,
+          // Propriétés listées explicitement plutôt que `all` : `all` anime
+          // aussi la couleur du texte et le filtre, ce qui saccade au défilement.
+          transition:
+            'background 400ms var(--ease-out), backdrop-filter 400ms var(--ease-out), border-color 400ms var(--ease-out)',
         }}
       >
         <Link
