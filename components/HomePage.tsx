@@ -273,6 +273,21 @@ function AnimatedText({ children, delay = 0 }: {
   return <div ref={ref} data-animate-text>{children}</div>
 }
 
+/**
+ * En-tête de section numéroté, suivi d'un filet — la convention des revues
+ * d'art. La numérotation donne au lecteur un repère de progression que le
+ * défilement seul ne fournit pas.
+ */
+function SectionLabel({ num, children }: { num: string; children: React.ReactNode }) {
+  return (
+    <div className="ed-label">
+      <span className="ed-label__num">{num}</span>
+      <span>{children}</span>
+      <span className="ed-label__rule" aria-hidden="true" />
+    </div>
+  )
+}
+
 function ProjectList({ projects }: { projects: Project[] }) {
   const [hovered, setHovered] = useState<string | null>(null)
   const [hoverImg, setHoverImg] = useState('')
@@ -487,33 +502,15 @@ export default function HomePage({ projects, home }: { projects: Project[]; home
           flexWrap: 'wrap',
           gap: '1.5rem',
         }}>
-          <div>
-            <p style={{
-              fontFamily: 'Ribes, serif',
-              fontWeight: 300,
-              fontSize: 'clamp(1.6rem, 4vw, 3rem)',
-              lineHeight: 1.1,
-              color: 'var(--black)',
-              maxWidth: '24rem',
-            }}>
-              {home.manifestoLine1}
-              <br />
-              <span style={{ color: 'var(--blue)' }}>{home.manifestoAccent}</span>
-            </p>
-          </div>
-          <Link
-            href="/projets"
-            style={{
-              fontFamily: 'Ribes, serif',
-              fontWeight: 400,
-              fontSize: '0.65rem',
-              letterSpacing: '0.15em',
-              textTransform: 'uppercase',
-              color: 'var(--blue)',
-              textDecoration: 'none',
-              paddingBottom: '0.2rem',
-            }}
-          >
+          {/* Exergue : la phrase-manifeste de la compagnie, traitée comme un
+              chapô de revue. C'est le seul endroit du site où le bleu porte du
+              sens plutôt qu'une simple fonction de lien. */}
+          <blockquote className="ed-display" style={{ maxWidth: '20ch', margin: 0 }}>
+            {home.manifestoLine1}
+            <br />
+            <span style={{ color: 'var(--blue)' }}>{home.manifestoAccent}</span>
+          </blockquote>
+          <Link href="/projets" className="ed-link">
             {home.manifestoCtaLabel}
           </Link>
         </div>
@@ -527,57 +524,22 @@ export default function HomePage({ projects, home }: { projects: Project[]; home
         }}
       >
 
-        <div style={{ maxWidth: '52rem', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <p style={{
-            fontFamily: 'Ribes, serif',
-            fontWeight: 400,
-            fontSize: '0.6rem',
-            letterSpacing: '0.18em',
-            textTransform: 'uppercase',
-            color: 'rgba(10,10,10,0.3)',
-            marginBottom: '2.5rem',
-          }}>
-            {home.introKicker}
-          </p>
+        <div style={{ maxWidth: '58rem', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <SectionLabel num="01">{home.introKicker}</SectionLabel>
 
           <AnimatedText delay={0}>
-            <p style={{
-              fontFamily: 'Ribes, serif',
-              fontWeight: 300,
-              fontSize: 'clamp(1rem, 2.2vw, 1.5rem)',
-              lineHeight: 1.75,
-              color: 'var(--black)',
-              marginBottom: '1.5rem',
-            }}>
+            <p className="ed-lead" style={{ marginBottom: '1.75rem' }}>
               {home.introParagraph1}
             </p>
           </AnimatedText>
 
           <AnimatedText delay={0.15}>
-            <p style={{
-              fontFamily: 'Ribes, serif',
-              fontWeight: 300,
-              fontSize: 'clamp(0.8rem, 1.5vw, 0.9rem)',
-              lineHeight: 1.8,
-              color: 'rgba(10,10,10,0.5)',
-              marginBottom: '3rem',
-            }}>
+            <p className="ed-body" style={{ marginBottom: '3rem' }}>
               {home.introParagraph2}
             </p>
           </AnimatedText>
 
-          <Link
-            href="/presentation"
-            style={{
-              fontFamily: 'Ribes, serif',
-              fontWeight: 400,
-              fontSize: '0.65rem',
-              letterSpacing: '0.15em',
-              textTransform: 'uppercase',
-              color: 'var(--blue)',
-              textDecoration: 'none',
-            }}
-          >
+          <Link href="/presentation" className="ed-link">
             {home.introCtaLabel}
           </Link>
         </div>
@@ -591,29 +553,12 @@ export default function HomePage({ projects, home }: { projects: Project[]; home
         }}
       >
         <div style={{
-          maxWidth: '42rem',
+          maxWidth: '58rem',
           margin: '0 auto',
           textAlign: 'left',
         }}>
-          <p style={{
-            fontFamily: 'Ribes, serif',
-            fontWeight: 400,
-            fontSize: '0.6rem',
-            letterSpacing: '0.18em',
-            textTransform: 'uppercase',
-            color: 'rgba(10,10,10,0.3)',
-            marginBottom: '1.5rem',
-          }}>
-            {home.imagesSectionKicker}
-          </p>
-          <p style={{
-            fontFamily: 'Ribes, serif',
-            fontWeight: 300,
-            fontSize: 'clamp(1rem, 2vw, 1.2rem)',
-            lineHeight: 1.65,
-            color: 'rgba(10,10,10,0.55)',
-            marginBottom: '2rem',
-          }}>
+          <SectionLabel num="02">{home.imagesSectionKicker}</SectionLabel>
+          <p className="ed-body" style={{ marginBottom: '2.5rem' }}>
             {home.imagesSectionBody}
           </p>
           <Link
@@ -641,33 +586,12 @@ export default function HomePage({ projects, home }: { projects: Project[]; home
         }}
       >
         <div style={{ maxWidth: '60rem', margin: '0 auto' }}>
-          <p style={{
-            fontFamily: 'Ribes, serif',
-            fontWeight: 400,
-            fontSize: '0.6rem',
-            letterSpacing: '0.18em',
-            textTransform: 'uppercase',
-            color: 'rgba(10,10,10,0.3)',
-            marginBottom: '3rem',
-          }}>
-            {home.creationsKicker}
-          </p>
+          <SectionLabel num="03">{home.creationsKicker}</SectionLabel>
 
           <ProjectList projects={projects} />
 
-          <div style={{ marginTop: '2.5rem', paddingTop: '1rem' }}>
-            <Link
-              href="/projets"
-              style={{
-                fontFamily: 'Ribes, serif',
-                fontWeight: 400,
-                fontSize: '0.65rem',
-                letterSpacing: '0.15em',
-                textTransform: 'uppercase',
-                color: 'var(--blue)',
-                textDecoration: 'none',
-              }}
-            >
+          <div style={{ marginTop: '3rem', paddingTop: '1.5rem', borderTop: '1px solid var(--rule)' }}>
+            <Link href="/projets" className="ed-link">
               {home.creationsFooterCtaLabel}
             </Link>
           </div>
