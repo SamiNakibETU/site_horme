@@ -391,6 +391,23 @@ html.js-ready [data-animate-text] {
   }
 }
 
+/* ─── États d'interaction ─────────────────────────────────────────────────────
+   Le site n'avait aucun style de focus : naviguer au clavier revenait à se
+   déplacer à l'aveugle, sans jamais savoir où l'on se trouve. */
+
+/* `:focus-visible` et non `:focus` : l'anneau n'apparaît qu'en navigation
+   clavier, jamais après un clic souris — c'est ce qui permet de le rendre
+   franchement visible sans gêner personne. */
+:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
 /* Retour au pressé : l'interface doit accuser réception du clic. */
 a:active,
 button:active {
@@ -398,6 +415,47 @@ button:active {
 }
 a, button {
   transition: transform 160ms var(--ease-out);
+}
+
+/* Cible tactile minimale de 44px : en dessous, les liens deviennent
+   difficiles à atteindre au pouce. On l'obtient par un pseudo-élément, pour
+   ne pas déformer la mise en page en ajoutant du padding. */
+@media (pointer: coarse) {
+  .ed-link::before,
+  nav a::before {
+    content: '';
+    position: absolute;
+    inset: -12px -8px;
+  }
+  nav a { position: relative; }
+}
+
+/* Sélection de texte accordée à l'identité plutôt qu'au bleu système. */
+::selection {
+  background: var(--blue);
+  color: #fff;
+}
+
+/* Lien d'évitement : permet de sauter la navigation pour atteindre le contenu.
+   Invisible jusqu'à ce qu'il reçoive le focus. */
+.skip-link {
+  position: absolute;
+  left: var(--gutter);
+  top: -100px;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  background: var(--black);
+  color: #fff;
+  font-family: 'Ribes', Georgia, serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: top 200ms var(--ease-out);
+}
+
+.skip-link:focus {
+  top: 1rem;
 }
 
 /* ─── Mouvement réduit ────────────────────────────────────────────────────────

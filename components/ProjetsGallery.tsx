@@ -31,13 +31,17 @@ function photoCreditLine(project: Project): string | null {
  * doit donc pas demander de viser.
  */
 export default function ProjetsGallery({ projects }: { projects: Project[] }) {
-  const pool = useMemo<PoolEntry[]>(
-    () =>
-      shuffle(
-        projects.flatMap((p, idx) => p.images.map(src => ({ src, projectIdx: idx }))),
-      ),
+  // Ordre stable, identique sur le serveur et au premier rendu client.
+  const ordered = useMemo<PoolEntry[]>(
+    () => projects.flatMap((p, idx) => p.images.map(src => ({ src, projectIdx: idx }))),
     [projects],
   )
+
+  // Le mélange n'a lieu qu'APRÈS le montage. Appeler Math.random() pendant le
+  // rendu produirait un ordre côté serveur et un autre côté client :
+  // l'hydratation diverge et les `src` d'images ne se stabilisent jamais.
+  const [pool, setPool] = useState<PoolEntry[]>(ordered)
+  useEffect(() => setPool(shuffle(ordered)), [ordered])
 
   const [index, setIndex] = useState(0)
   const current = pool[index]
@@ -118,10 +122,16 @@ export default function ProjetsGallery({ projects }: { projects: Project[] }) {
       {/* L'image. `key` sur l'index déclenche le remontage, donc l'animation
           de fondu : chaque photo entre par elle-même plutôt que de remplacer
           brutalement la précédente. */}
+      {/* Image dimensionnée normalement plutôt qu'en `fill` : `fill` repose sur
+          un positionnement absolu dont la hauteur dépend entièrement du parent,
+          fragile à l'intérieur d'une grille. Ici la photo se contraint elle-même
+          à l'espace disponible et se centre, sans dépendre de la piste. */}
       <div
         style={{
-          position: 'relative',
           minHeight: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           margin: 'clamp(1.5rem, 4vh, 3rem) var(--gutter)',
         }}
       >
@@ -129,11 +139,18 @@ export default function ProjetsGallery({ projects }: { projects: Project[] }) {
           key={index}
           src={current.src}
           alt={`${project.title} — ${project.type}, ${project.year}`}
-          fill
+          width={1920}
+          height={1280}
           priority
           sizes="90vw"
           className="gallery-photo"
-          style={{ objectFit: 'contain', objectPosition: 'center' }}
+          style={{
+            width: 'auto',
+            height: 'auto',
+            maxWidth: '100%',
+            maxHeight: '100%',
+            objectFit: 'contain',
+          }}
         />
       </div>
 

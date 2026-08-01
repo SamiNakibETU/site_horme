@@ -39,9 +39,14 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
   return (
     <>
+      {/* Premier élément focusable de la page : permet d'atteindre le contenu
+          sans traverser toute la navigation à chaque changement de page. */}
+      <a href="#contenu" className="skip-link">Aller au contenu</a>
       <ScrollAnimations />
       <Navbar navigation={navigation} />
-      <PageTransition>{children}</PageTransition>
+      <PageTransition>
+        <div id="contenu">{children}</div>
+      </PageTransition>
       <Footer data={footer} />
       {draft.isEnabled ? <SanityVisualEditing /> : null}
     </>
