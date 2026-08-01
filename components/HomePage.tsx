@@ -394,8 +394,18 @@ function ProjectList({ projects }: { projects: Project[] }) {
         zIndex: 10,
         boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
       }}>
+        {/* `key` sur la source : chaque survol remonte l'élément, donc rejoue
+            le fondu. Sans lui, passer d'un projet à l'autre remplacerait la
+            photo d'un coup sec. */}
         {hoverImg && (
-          <Image src={hoverImg} alt="" fill style={{ objectFit: 'cover' }} />
+          <Image
+            key={hoverImg}
+            src={hoverImg}
+            alt=""
+            fill
+            className="gallery-photo"
+            style={{ objectFit: 'cover' }}
+          />
         )}
       </div>
     </div>

@@ -170,6 +170,18 @@ body {
   .ed-link:hover::after { transform: scaleX(1); }
 }
 
+/* Entrée d'une photo de la planche-contact. Fondu seul, sans déplacement :
+   l'image occupe déjà sa place définitive, la faire glisser suggérerait à tort
+   qu'elle vient d'ailleurs. */
+@keyframes photoIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.gallery-photo {
+  animation: photoIn 420ms var(--ease-out) both;
+}
+
 /* Légende d'image, façon planche documentaire. */
 .ed-caption {
   font-family: 'Ribes', Georgia, serif;

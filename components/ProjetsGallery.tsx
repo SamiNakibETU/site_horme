@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Project } from '@/data/projects'
@@ -17,253 +17,187 @@ type PoolEntry = { src: string; projectIdx: number }
 
 function photoCreditLine(project: Project): string | null {
   const names = project.photographer.filter(
-    p => p && !/^à compléter$/i.test(p.trim())
+    p => p && !/^à compléter$/i.test(p.trim()),
   )
-  if (!names.length) return null
-  return names.join(', ')
+  return names.length ? names.join(', ') : null
 }
 
+/**
+ * Planche-contact plein écran.
+ *
+ * Une seule image à la fois, au centre ; les informations sont repoussées aux
+ * deux bords de l'écran pour laisser la photographie occuper tout le milieu.
+ * Toute la surface est cliquable — c'est le geste principal de la page, il ne
+ * doit donc pas demander de viser.
+ */
 export default function ProjetsGallery({ projects }: { projects: Project[] }) {
-  const [hovered, setHovered] = useState<number | null>(null)
-  const [mouse, setMouse] = useState({ x: 0, y: 0 })
+  const pool = useMemo<PoolEntry[]>(
+    () =>
+      shuffle(
+        projects.flatMap((p, idx) => p.images.map(src => ({ src, projectIdx: idx }))),
+      ),
+    [projects],
+  )
 
-  const pool = useMemo<PoolEntry[]>(() => {
-    const entries: PoolEntry[] = []
-    projects.forEach((p, idx) => {
-      p.images.forEach(src => entries.push({ src, projectIdx: idx }))
-    })
-    return shuffle(entries)
-  }, [projects])
-
-  const [imageIndex, setImageIndex] = useState(0)
-  const current = pool[imageIndex]
-  const activeProjectIdx = current?.projectIdx ?? 0
-  const project = projects[activeProjectIdx]
-
-  const [isHovering, setIsHovering] = useState(false)
-  const [prevIndex, setPrevIndex] = useState<number | null>(null)
-
-  const handleImageClick = () => {
-    setPrevIndex(imageIndex)
-    setImageIndex(prev => (prev + 1) % pool.length)
-  }
-
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => setMouse({ x: e.clientX, y: e.clientY })
-    window.addEventListener('mousemove', onMove)
-    return () => window.removeEventListener('mousemove', onMove)
-  }, [])
-
+  const [index, setIndex] = useState(0)
+  const current = pool[index]
+  const project = projects[current?.projectIdx ?? 0]
   const credit = project ? photoCreditLine(project) : null
+
+  const next = useCallback(() => {
+    if (pool.length > 1) setIndex(i => (i + 1) % pool.length)
+  }, [pool.length])
+
+  const prev = useCallback(() => {
+    if (pool.length > 1) setIndex(i => (i - 1 + pool.length) % pool.length)
+  }, [pool.length])
+
+  // La navigation au clavier double le clic : sans elle, la page entière
+  // serait inatteignable sans souris.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next() }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev() }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [next, prev])
+
+  if (!project) return null
 
   return (
     <div
       data-nav-theme="light"
+      onClick={next}
       style={{
-        minHeight: '100dvh',
-        background: `
-          radial-gradient(ellipse 55% 30% at 15% 45%, rgba(28,76,244,0.08) 0%, transparent 60%),
-          radial-gradient(ellipse 45% 35% at 80% 55%, rgba(28,76,244,0.06) 0%, transparent 55%),
-          var(--white)
-        `,
-        display: 'flex',
-        flexDirection: 'column',
-        paddingTop: '5rem',
+        position: 'relative',
+        height: '100dvh',
+        overflow: 'hidden',
+        cursor: 'pointer',
+        background: 'var(--white)',
+        display: 'grid',
+        gridTemplateRows: 'auto 1fr auto',
       }}
     >
-
-      <div className="projets-titles" style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'baseline',
-        padding: '2rem var(--gutter) 0',
-        paddingBottom: '1rem',
-        flexShrink: 0,
-      }}>
-        {projects.map((p, i) => (
-          <Link
-            key={p.slug}
-            href={`/projets/${p.slug}`}
-            onMouseEnter={() => setHovered(i)}
-            onMouseLeave={() => setHovered(null)}
-            style={{
-              fontFamily: 'Ribes, serif',
-              fontWeight: activeProjectIdx === i ? 400 : 300,
-              fontSize: 'clamp(0.9rem, 2vw, 1.4rem)',
-              color: activeProjectIdx === i
-                ? 'var(--blue)'
-                : hovered === i
-                  ? 'var(--black)'
-                  : 'rgba(10,10,10,0.3)',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              transition: 'color 0.3s ease, font-weight 0.3s ease',
-              textDecoration: 'none',
-              textAlign: 'center',
-              flex: 1,
-              padding: '0 1rem',
-            }}
-          >
-            {p.title}
-          </Link>
-        ))}
-      </div>
-
-      <div style={{
-        flex: '1 1 auto',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem var(--gutter) 0',
-        minHeight: 0,
-      }}>
-        <div
-          onClick={handleImageClick}
-          onMouseEnter={() => setIsHovering(true)}
-          onMouseLeave={() => setIsHovering(false)}
-          style={{
-            position: 'relative',
-            width: 'min(85vw, 560px)',
-            maxHeight: 'min(48vh, 420px)',
-            minHeight: 'min(36vh, 320px)',
-            aspectRatio: '4/3',
-            cursor: 'pointer',
-            overflow: 'hidden',
-            transition: 'transform 0.35s ease',
-            transform: isHovering ? 'scale(1.015)' : 'scale(1)',
-            background: '#f4f4f4',
-          }}
-        >
-          {prevIndex !== null && prevIndex !== imageIndex && (
-            <div
-              key={`prev-${prevIndex}`}
+      {/* Bandeau des créations. `stopPropagation` sur chaque lien : sans lui,
+          le clic ouvrirait la fiche ET changerait la photo. */}
+      <nav
+        className="projets-titles"
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          gap: 'clamp(1.5rem, 4vw, 4rem)',
+          padding: 'calc(var(--gutter) + 3.5rem) var(--gutter) 0',
+        }}
+      >
+        {projects.map((p, i) => {
+          const active = current.projectIdx === i
+          return (
+            <Link
+              key={p.slug}
+              href={`/projets/${p.slug}`}
+              onClick={e => e.stopPropagation()}
               style={{
-                position: 'absolute',
-                inset: 0,
-                opacity: 0,
-                transition: 'opacity 0.35s ease-out',
+                fontFamily: 'Ribes, Georgia, serif',
+                fontWeight: 400,
+                fontSize: 'var(--step--1)',
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                color: active ? 'var(--blue)' : 'var(--ink-soft)',
+                textDecoration: 'none',
+                transition: 'color 320ms var(--ease-out)',
               }}
             >
-              <Image
-                src={pool[prevIndex].src}
-                alt=""
-                fill
-                style={{ objectFit: 'contain', objectPosition: 'center' }}
-              />
-            </div>
-          )}
-          <div
-            key={`cur-${imageIndex}`}
+              {p.title}
+            </Link>
+          )
+        })}
+      </nav>
+
+      {/* L'image. `key` sur l'index déclenche le remontage, donc l'animation
+          de fondu : chaque photo entre par elle-même plutôt que de remplacer
+          brutalement la précédente. */}
+      <div
+        style={{
+          position: 'relative',
+          minHeight: 0,
+          margin: 'clamp(1.5rem, 4vh, 3rem) var(--gutter)',
+        }}
+      >
+        <Image
+          key={index}
+          src={current.src}
+          alt={`${project.title} — ${project.type}, ${project.year}`}
+          fill
+          priority
+          sizes="90vw"
+          className="gallery-photo"
+          style={{ objectFit: 'contain', objectPosition: 'center' }}
+        />
+      </div>
+
+      {/* Informations plaquées aux deux bords : la photographie garde tout le
+          centre, et l'œil circule d'un angle à l'autre plutôt que de buter
+          sur un bloc compact. */}
+      <footer
+        className="projets-bottom"
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-end',
+          gap: '1.5rem',
+          padding: '0 var(--gutter) clamp(1.5rem, 4vh, 2.5rem)',
+        }}
+      >
+        <div>
+          <p
             style={{
-              position: 'absolute',
-              inset: 0,
-              opacity: 1,
-              transition: 'opacity 0.35s ease-out',
+              fontFamily: 'Ribes, Georgia, serif',
+              fontSize: '0.6rem',
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              color: 'var(--ink-soft)',
+              marginBottom: '0.5rem',
             }}
           >
-            <Image
-              src={pool[imageIndex].src}
-              alt=""
-              fill
-              style={{ objectFit: 'contain', objectPosition: 'center' }}
-            />
-          </div>
+            {project.type} · {project.year}
+          </p>
+          <p className="ed-display" style={{ fontSize: 'var(--step-1)' }}>
+            {project.title}
+          </p>
+          {credit && (
+            <p className="ed-caption" style={{ marginTop: '0.5rem' }}>
+              Photo · {credit}
+            </p>
+          )}
         </div>
 
-        <div
-          className="projets-bottom"
-          style={{
-            width: 'min(85vw, 560px)',
-            marginTop: '1.25rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-end',
-            flexWrap: 'wrap',
-            gap: '1rem',
-            paddingBottom: '1.5rem',
-          }}
-        >
-          <div>
-            <p style={{
-              fontFamily: 'Ribes, serif',
-              fontWeight: 400,
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '2rem' }}>
+          <span
+            aria-hidden="true"
+            style={{
+              fontFamily: 'Ribes, Georgia, serif',
               fontSize: '0.6rem',
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: 'rgba(10,10,10,0.3)',
-              marginBottom: '0.4rem',
-            }}>
-              {project.type} · {project.year}
-            </p>
-            <p style={{
-              fontFamily: 'Ribes, serif',
-              fontWeight: 300,
-              fontSize: 'clamp(1.2rem, 2.5vw, 1.8rem)',
-              color: 'var(--black)',
-            }}>
-              {project.title}
-            </p>
-            {credit && (
-              <p style={{
-                fontFamily: 'Ribes, serif',
-                fontWeight: 400,
-                fontSize: '0.55rem',
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                color: 'rgba(10,10,10,0.35)',
-                marginTop: '0.5rem',
-              }}>
-                Photo · {credit}
-              </p>
-            )}
-          </div>
-
+              letterSpacing: '0.16em',
+              color: 'var(--ink-soft)',
+              fontVariantNumeric: 'tabular-nums',
+            }}
+          >
+            {String(index + 1).padStart(2, '0')} / {String(pool.length).padStart(2, '0')}
+          </span>
           <Link
             href={`/projets/${project.slug}`}
-            style={{
-              fontFamily: 'Ribes, serif',
-              fontWeight: 400,
-              fontSize: '0.65rem',
-              letterSpacing: '0.15em',
-              textTransform: 'uppercase',
-              color: 'var(--blue)',
-              textDecoration: 'none',
-            }}
+            className="ed-link"
+            onClick={e => e.stopPropagation()}
           >
             Ouvrir →
           </Link>
         </div>
+      </footer>
 
-        {pool.length > 1 && (
-          <link
-            rel="prefetch"
-            href={pool[(imageIndex + 1) % pool.length].src}
-            as="image"
-          />
-        )}
-      </div>
-
-      {hovered !== null && hovered !== activeProjectIdx && (
-        <div style={{
-          position: 'fixed',
-          left: mouse.x + 18,
-          top: mouse.y - 90,
-          width: 130,
-          height: 170,
-          pointerEvents: 'none',
-          zIndex: 50,
-          opacity: 0.9,
-          transition: 'opacity 0.2s',
-        }}>
-          <Image
-            src={projects[hovered].coverImage}
-            alt=""
-            fill
-            style={{ objectFit: 'cover' }}
-          />
-        </div>
+      {/* Précharge la vue suivante pour que le fondu ne montre jamais de vide. */}
+      {pool.length > 1 && (
+        <link rel="prefetch" as="image" href={pool[(index + 1) % pool.length].src} />
       )}
     </div>
   )
