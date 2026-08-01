@@ -55,6 +55,7 @@ const qHome = `*[_id == $id][0]{
   heroLine2,
   slides[]{
     "url": image.asset->url,
+    alt,
     objectFit,
     objectPosition
   },
@@ -105,6 +106,7 @@ function mergeHome(row: Record<string, unknown> | null): HomePageCms {
   const rawSlides = (row.slides as HomePageCms['slides'] | undefined)?.filter(s => s?.url) ?? []
   const slides = rawSlides.map(s => ({
     url: s.url,
+    alt: s.alt || '',
     objectFit: s.objectFit === 'contain' ? 'contain' as const : 'cover' as const,
     objectPosition: s.objectPosition || 'center',
   }))

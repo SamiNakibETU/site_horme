@@ -42,3 +42,7 @@ studio/.sanity/
 next-env.d.ts
 
 .vercel
+
+# skills d'agent installees localement (npx skills add)
+.agents/
+.claude/

@@ -33,6 +33,7 @@ export type SiteSettingsCms = {
 
 export type HomeSlideCms = {
   url: string
+  alt: string
   objectFit: 'cover' | 'contain'
   objectPosition: string
 }

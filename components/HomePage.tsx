@@ -11,6 +11,8 @@ gsap.registerPlugin(ScrollTrigger)
 
 export type CinematicSlide = {
   src: string
+  /** Description saisie dans le CMS. Vide = photo purement décorative. */
+  alt?: string
   objectFit?: 'cover' | 'contain'
   objectPosition?: string
 }
@@ -70,7 +72,7 @@ function CinematicScroll({ slides }: { slides: CinematicSlide[] }) {
             }}>
               <Image
                 src={slide.src}
-                alt=""
+                alt={slide.alt ?? ''}
                 fill
                 className={slide.objectFit === 'contain' ? 'object-contain' : 'object-cover'}
                 style={{
@@ -143,7 +145,7 @@ function CinematicScroll({ slides }: { slides: CinematicSlide[] }) {
                 }}>
                   <Image
                     src={slide.src}
-                    alt=""
+                    alt={slide.alt ?? ''}
                     fill
                     className={fit === 'contain' ? 'object-contain' : 'object-cover'}
                     style={{
@@ -384,6 +386,7 @@ function ProjectList({ projects }: { projects: Project[] }) {
 function slidesFromCms(home: HomePageCms): CinematicSlide[] {
   return home.slides.map(s => ({
     src: s.url,
+    alt: s.alt,
     objectFit: s.objectFit,
     objectPosition: s.objectPosition,
   }))

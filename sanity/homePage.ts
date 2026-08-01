@@ -13,7 +13,7 @@ import { defineField, defineType } from 'sanity'
  */
 export const homePageType = defineType({
   name: 'homePage',
-  title: '🏠 Page d'Accueil',
+  title: '🏠 Page d\'Accueil',
   type: 'document',
   description:
     '👋 Bienvenue! Vous modifiez la première page que les visiteurs voient. ' +

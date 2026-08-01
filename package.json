@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "studio": "npm run dev --prefix studio",
+    "studio:deploy": "sanity deploy",
+    "content:backup": "sanity dataset export production backups/production.tar.gz",
     "seed:sanity": "node scripts/seed-sanity.mjs",
     "seed:singletons": "node scripts/seed-singletons.mjs"
   },
@@ -21,7 +22,8 @@
     "next": "14.2.35",
     "next-sanity": "^9.12.3",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "styled-components": "^6.4.4"
   },
   "devDependencies": {
     "@sanity/vision": "^3.62.3",

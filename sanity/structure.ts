@@ -14,32 +14,32 @@ const singletonListItem = (
 
 export const structure: StructureResolver = S =>
   S.list()
-    .title(‘📍 Contenu du site Horrmê’)
+    .title('📍 Contenu du site Horme')
     .items([
       // ===== PAGES PRINCIPALES =====
       S.listItem()
-        .title(‘📄 PAGES PRINCIPALES’)
-        .id(‘pages-groupe’)
+        .title('📄 PAGES PRINCIPALES')
+        .id('pages-groupe')
         .child(
           S.list()
-            .title(‘Pages du site’)
+            .title('Pages du site')
             .items([
               singletonListItem(
                 S,
-                ‘homePage’,
-                ‘🏠 Accueil’,
+                'homePage',
+                '🏠 Accueil',
                 SANITY_SINGLETON_IDS.homePage,
               ),
               singletonListItem(
                 S,
-                ‘presentationPage’,
-                ‘👥 Présentation’,
+                'presentationPage',
+                '👥 Présentation',
                 SANITY_SINGLETON_IDS.presentationPage,
               ),
               singletonListItem(
                 S,
-                ‘contactPage’,
-                ‘✉️ Contact’,
+                'contactPage',
+                '✉️ Contact',
                 SANITY_SINGLETON_IDS.contactPage,
               ),
             ]),
@@ -49,36 +49,36 @@ export const structure: StructureResolver = S =>
 
       // ===== CRÉATIONS =====
       S.listItem()
-        .title(‘🎭 CRÉATIONS (Spectacles & Projets)’)
-        .id(‘creations’)
-        .child(S.documentTypeList(‘project’).title(‘🎭 Créations’)),
+        .title('🎭 CRÉATIONS (Spectacles & Projets)')
+        .id('creations')
+        .child(S.documentTypeList('project').title('🎭 Créations')),
 
       S.divider(),
 
       // ===== CONFIGURATION =====
       S.listItem()
-        .title(‘⚙️ CONFIGURATION DU SITE’)
-        .id(‘config-groupe’)
+        .title('⚙️ CONFIGURATION DU SITE')
+        .id('config-groupe')
         .child(
           S.list()
-            .title(‘Configuration’)
+            .title('Configuration')
             .items([
               singletonListItem(
                 S,
-                ‘navigation’,
-                ‘🔗 Menu de navigation (haut du site)’,
+                'navigation',
+                '🔗 Menu de navigation (haut du site)',
                 SANITY_SINGLETON_IDS.navigation,
               ),
               singletonListItem(
                 S,
-                ‘footerContent’,
-                ‘👣 Pied de page’,
+                'footerContent',
+                '👣 Pied de page',
                 SANITY_SINGLETON_IDS.footerContent,
               ),
               singletonListItem(
                 S,
-                ‘siteSettings’,
-                ‘🔍 Référencement & SEO’,
+                'siteSettings',
+                '🔍 Référencement & SEO',
                 SANITY_SINGLETON_IDS.siteSettings,
               ),
             ]),
