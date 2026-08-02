@@ -190,6 +190,29 @@ body:has(.gallery-fullscreen) > footer {
   display: none;
 }
 
+/* Adresse e-mail : c'est l'action principale de la page Contact, elle mérite
+   d'être traitée en grand corps plutôt qu'en petit lien. Le soulignement est
+   permanent mais discret, et se renforce au survol — un e-mail doit se lire
+   immédiatement comme cliquable. */
+.ed-mail {
+  font-family: 'Ribes', Georgia, serif;
+  font-weight: 300;
+  font-size: var(--step-1);
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.15em;
+  transition: color 240ms var(--ease-out), border-color 240ms var(--ease-out);
+  overflow-wrap: anywhere;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ed-mail:hover {
+    color: var(--blue);
+    border-color: var(--blue);
+  }
+}
+
 /* Légende d'image, façon planche documentaire. */
 .ed-caption {
   font-family: 'Ribes', Georgia, serif;

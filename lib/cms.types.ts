@@ -4,9 +4,6 @@ export type NavLink = { label: string; href: string }
 
 export type NavigationCms = {
   creationButtonLabel: string
-  trembleGroupTitle: string
-  trembleLinks: NavLink[]
-  directLinks: NavLink[]
 }
 
 export type FooterCms = {

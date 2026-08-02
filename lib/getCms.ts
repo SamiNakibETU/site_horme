@@ -27,12 +27,7 @@ const qSettings = `*[_id == $id][0]{
   "ogImage": coalesce(ogImage.asset->url, "")
 }`
 
-const qNav = `*[_id == $id][0]{
-  creationButtonLabel,
-  trembleGroupTitle,
-  trembleLinks[]{ label, href },
-  directLinks[]{ label, href }
-}`
+const qNav = `*[_id == $id][0]{ creationButtonLabel }`
 
 const qFooter = `*[_id == $id][0]{
   brandLine,
@@ -175,14 +170,9 @@ export async function getNavigation(): Promise<NavigationCms> {
       id: SANITY_SINGLETON_IDS.navigation,
     })
     if (!row) return defaultNavigation
-    const tremble = ((row.trembleLinks as NavigationCms['trembleLinks']) || []).filter(l => l?.href && l?.label)
-    const direct = ((row.directLinks as NavigationCms['directLinks']) || []).filter(l => l?.href && l?.label)
-    if (!tremble.length && !direct.length) return defaultNavigation
     return {
-      creationButtonLabel: (row.creationButtonLabel as string) || defaultNavigation.creationButtonLabel,
-      trembleGroupTitle: (row.trembleGroupTitle as string) || defaultNavigation.trembleGroupTitle,
-      trembleLinks: tremble.length ? tremble : defaultNavigation.trembleLinks,
-      directLinks: direct.length ? direct : defaultNavigation.directLinks,
+      creationButtonLabel:
+        (row.creationButtonLabel as string) || defaultNavigation.creationButtonLabel,
     }
   } catch {
     return defaultNavigation

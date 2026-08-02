@@ -26,98 +26,39 @@ export default async function ContactPage() {
         `,
       }}
     >
-      <div style={{ padding: '0 var(--gutter)', maxWidth: '40rem', margin: '0 auto' }}>
+      <div style={{ padding: '0 var(--gutter)', maxWidth: '52rem', margin: '0 auto' }}>
 
-        <p style={{
-          fontFamily: 'Ribes, serif',
-          fontWeight: 400,
-          fontSize: '0.6rem',
-          letterSpacing: '0.18em',
-          textTransform: 'uppercase',
-          color: 'rgba(10,10,10,0.3)',
-          marginBottom: '2rem',
-        }}>
+        <p className="ed-caption" style={{ marginTop: 0, marginBottom: '1.5rem' }}>
           {c.kicker}
         </p>
 
-        <h1 style={{
-          fontFamily: 'Ribes, Georgia, serif',
-          fontWeight: 300,
-          fontSize: 'clamp(2.5rem, 5vw, 5rem)',
-          lineHeight: 1,
-          color: 'var(--black)',
-          marginBottom: '4rem',
-        }}>
+        <h1 className="ed-display" style={{ fontSize: 'var(--step-3)', marginBottom: 'clamp(3rem, 7vw, 5rem)' }}>
           {c.title}
         </h1>
 
-        <div style={{ marginBottom: '4rem' }}>
-          <p style={{
-            fontFamily: 'Ribes, serif',
-            fontWeight: 400,
-            fontSize: '0.6rem',
-            letterSpacing: '0.18em',
-            textTransform: 'uppercase',
-            color: 'rgba(10,10,10,0.3)',
-            marginBottom: '0.75rem',
-          }}>
+        {/* Chaque information est posée sous un filet plutôt que séparée par du
+            vide : la ligne donne une structure de fiche, et permet de resserrer
+            les blocs sans qu'ils se confondent. */}
+        <div style={{ borderTop: '1px solid var(--rule)', paddingTop: '1.25rem', marginBottom: '2.5rem' }}>
+          <p className="ed-caption" style={{ marginTop: 0, marginBottom: '0.75rem' }}>
             {c.emailLabel}
           </p>
-          <a
-            href={`mailto:${c.email}`}
-            style={{
-              fontFamily: 'Ribes, serif',
-              fontWeight: 300,
-              fontSize: 'clamp(1.1rem, 2vw, 1.4rem)',
-              color: 'var(--black)',
-              textDecoration: 'none',
-              transition: 'color 0.2s',
-            }}
-          >
+          <a href={`mailto:${c.email}`} className="ed-mail">
             {c.email}
           </a>
         </div>
 
-        <div style={{ marginBottom: '4rem' }}>
-          <p style={{
-            fontFamily: 'Ribes, serif',
-            fontWeight: 400,
-            fontSize: '0.6rem',
-            letterSpacing: '0.18em',
-            textTransform: 'uppercase',
-            color: 'rgba(10,10,10,0.3)',
-            marginBottom: '0.75rem',
-          }}>
+        <div style={{ borderTop: '1px solid var(--rule)', paddingTop: '1.25rem', marginBottom: '3.5rem' }}>
+          <p className="ed-caption" style={{ marginTop: 0, marginBottom: '0.75rem' }}>
             {c.locationLabel}
           </p>
-          <p style={{
-            fontFamily: 'Ribes, serif',
-            fontWeight: 300,
-            fontSize: '0.9rem',
-            color: 'rgba(10,10,10,0.5)',
-            lineHeight: 1.8,
-            whiteSpace: 'pre-line',
-          }}>
+          <p className="ed-body" style={{ whiteSpace: 'pre-line' }}>
             {c.locationText}
           </p>
         </div>
 
-        <div style={{
-          paddingTop: '3rem',
-          paddingBottom: '5rem',
-        }}>
-          <Link
-            href="/"
-            style={{
-              fontFamily: 'Ribes, serif',
-              fontWeight: 400,
-              fontSize: '0.65rem',
-              letterSpacing: '0.15em',
-              textTransform: 'uppercase',
-              color: 'var(--blue)',
-              textDecoration: 'none',
-            }}
-          >
+        <div style={{ paddingBottom: '5rem' }}>
+          <Link href="/" className="ed-link">
             {c.backLinkLabel}
           </Link>
         </div>

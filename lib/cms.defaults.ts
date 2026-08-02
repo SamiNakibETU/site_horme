@@ -17,17 +17,6 @@ export const defaultSiteSettings: SiteSettingsCms = {
 
 export const defaultNavigation: NavigationCms = {
   creationButtonLabel: 'Création',
-  trembleGroupTitle: 'Tout ce qui tremble',
-  trembleLinks: [
-    { href: '/projets/jardiniers-montrouge', label: 'Les Jardiniers · Montrouge' },
-    { href: '/creation/tout-ce-qui-tremble/regard-du-cygne', label: 'Regard du Cygne' },
-    { href: '/creation/tout-ce-qui-tremble/theatre-douze', label: 'Théâtre Douze' },
-  ],
-  directLinks: [
-    { href: '/creation/rann', label: 'Rann' },
-    { href: '/projets/khormos', label: 'Khorrmo(s)' },
-    { href: '/creation/bastille-design-center', label: 'Bastille Design Center' },
-  ],
 }
 
 export const defaultFooter: FooterCms = {

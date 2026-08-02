@@ -1,73 +1,34 @@
-import { defineArrayMember, defineField, defineType } from 'sanity'
+import { defineField, defineType } from 'sanity'
 
 export const navigationType = defineType({
   name: 'navigation',
-  title: '🔗 Menu Principal',
+  title: '🔗 Menu de navigation',
   type: 'document',
-  description: 'Menu du haut à droite avec le bouton "Création" et ses sous-menus. Modifiez les libellés et liens ici.',
+  description:
+    'Le menu en haut à droite du site. Il compte trois entrées : Création, ' +
+    'Présentation et Contact. Seul le libellé de la première est modifiable ' +
+    'ici — les deux autres portent le nom de leur page.',
   fields: [
     defineField({
       name: 'creationButtonLabel',
-      title: 'Libellé du bouton Création',
-      description: 'Le texte du bouton principal en haut à droite',
+      title: 'Libellé de l’entrée « Création »',
+      description:
+        'Le mot affiché dans le menu pour accéder aux créations. ' +
+        'Il mène à la page qui les présente toutes.',
       type: 'string',
       initialValue: 'Création',
+      validation: Rule => Rule.required().error('Le menu a besoin d’un libellé.'),
     }),
-    defineField({
-      name: 'trembleGroupTitle',
-      title: 'Création — Groupe 1 : Surtitre (Tout ce qui tremble)',
-      description: 'Titre du groupe 1 (avec sous-menus). Ex: "Tout ce qui tremble"',
-      type: 'string',
-      initialValue: 'Tout ce qui tremble',
-    }),
-    defineField({
-      name: 'trembleLinks',
-      title: 'Création — Groupe 1 : Sous-menus (Jardiniers, Regard, Théâtre)',
-      description: 'Les 3 sous-projets de "Tout ce qui tremble". Ex: Jardiniers Montrouge, Regard du Cygne, Théâtre Douze',
-      type: 'array',
-      of: [
-        defineArrayMember({
-          type: 'object',
-          name: 'trembleMenuLink',
-          fields: [
-            defineField({ name: 'label', title: 'Libellé', type: 'string', validation: Rule => Rule.required() }),
-            defineField({ name: 'href', title: 'URL (chemin)', type: 'string', validation: Rule => Rule.required() }),
-          ],
-          preview: {
-            select: { title: 'label', subtitle: 'href' },
-          },
-        }),
-      ],
-    }),
-    defineField({
-      name: 'directLinks',
-      title: 'Création — Autres liens (sans surtitre)',
-      description: 'Rann, Khorrmos, Bastille Design Center, etc. S\'affichent sans groupe.',
-      type: 'array',
-      of: [
-        defineArrayMember({
-          type: 'object',
-          name: 'directMenuLink',
-          fields: [
-            defineField({
-              name: 'label',
-              title: 'Libellé',
-              type: 'string',
-              validation: Rule => Rule.required()
-            }),
-            defineField({
-              name: 'href',
-              title: 'URL (chemin)',
-              description: 'Ex: "/creation/rann", "/creation/khorrmos", "/creation/bastille-design-center"',
-              type: 'string',
-              validation: Rule => Rule.required()
-            }),
-          ],
-          preview: {
-            select: { title: 'label', subtitle: 'href' },
-          },
-        }),
-      ],
-    }),
+    // Les champs « Groupe 1 », « Sous-menus » et « Autres liens » ont été
+    // retirés : ils alimentaient un menu déroulant qui n'existe plus. Les
+    // conserver aurait été pire que de les supprimer — quelqu'un les aurait
+    // remplis, n'aurait vu aucun effet sur le site, et en aurait conclu que
+    // le CMS était cassé. Les créations se gèrent désormais dans « Créations ».
   ],
+  preview: {
+    select: { title: 'creationButtonLabel' },
+    prepare({ title }) {
+      return { title: 'Menu de navigation', subtitle: title || 'Création' }
+    },
+  },
 })
