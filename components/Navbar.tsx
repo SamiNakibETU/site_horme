@@ -9,34 +9,12 @@ function isCreationPath(pathname: string) {
   return pathname.startsWith('/creation') || pathname.startsWith('/projets')
 }
 
-const linkStyle = (
-  active: boolean,
-  textColor: string,
-  textColorDim: string,
-) => ({
-  fontFamily: 'Ribes, Georgia, serif',
-  fontWeight: 400,
-  fontSize: '0.68rem',
-  letterSpacing: '0.14em',
-  textTransform: 'uppercase' as const,
-  color: active ? textColor : textColorDim,
-  transition: 'color 0.3s ease',
-  textDecoration: 'none',
-})
-
 export default function Navbar({ navigation }: { navigation: NavigationCms }) {
-  const creationLinks = {
-    tremble: navigation.trembleLinks,
-    direct: navigation.directLinks,
-  }
   const pathname = usePathname()
   const [navTheme, setNavTheme] = useState<'light' | 'dark'>('dark')
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [creationOpen, setCreationOpen] = useState(false)
-  const [mobileCreationOpen, setMobileCreationOpen] = useState(false)
   const navRef = useRef<HTMLElement>(null)
-  const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const updateTheme = () => {
@@ -72,20 +50,7 @@ export default function Navbar({ navigation }: { navigation: NavigationCms }) {
 
   useEffect(() => {
     setMenuOpen(false)
-    setCreationOpen(false)
-    setMobileCreationOpen(false)
   }, [pathname])
-
-  useEffect(() => {
-    if (!creationOpen) return
-    const onDown = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setCreationOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', onDown)
-    return () => document.removeEventListener('mousedown', onDown)
-  }, [creationOpen])
 
   const isDark = navTheme === 'dark' && !menuOpen
   const textColor = isDark ? '#FFFFFF' : '#0A0A0A'
@@ -108,6 +73,10 @@ export default function Navbar({ navigation }: { navigation: NavigationCms }) {
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '0.75rem var(--gutter)',
+          // Les liens lisent ces deux variables. Le thème change donc en CSS,
+          // sans qu'aucun style inline ne vienne figer une couleur périmée.
+          ['--nav-ink' as string]: textColor,
+          ['--nav-ink-dim' as string]: textColorDim,
           // Voile translucide accordé au thème de la section survolée. Absent en
           // haut de page pour laisser la vidéo du héro occuper tout le cadre.
           background: scrolled
@@ -153,111 +122,26 @@ export default function Navbar({ navigation }: { navigation: NavigationCms }) {
           />
         </Link>
 
+        {/* Plus de menu déroulant : « Création » mène directement à la page des
+            créations, où les projets sont présentés en pleine page. Un menu qui
+            s'ouvre pour révéler trois liens ajoute une étape sans rien apporter
+            que la page de destination ne montre déjà mieux. */}
         <ul className="nav-desktop" style={{
           display: 'flex',
           alignItems: 'center',
           gap: '2.5rem',
           listStyle: 'none',
         }}>
-          <li style={{ position: 'relative' }}>
-            <div ref={dropdownRef} style={{ position: 'relative', display: 'inline-block' }}>
-            <button
-              type="button"
-              aria-expanded={creationOpen}
-              aria-haspopup="true"
-              onClick={() => setCreationOpen(o => !o)}
-              onKeyDown={(e) => {
-                if (e.key === 'Escape') setCreationOpen(false)
-              }}
-              style={{
-                ...linkStyle(creationActive, textColor, textColorDim),
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: 0,
-              }}
-            >
-              {navigation.creationButtonLabel}
-            </button>
-            {creationOpen && (
-              <div
-                className="nav-creation-dropdown"
-                style={{
-                  position: 'absolute',
-                  top: '100%',
-                  right: 0,
-                  marginTop: '0.75rem',
-                  minWidth: 'min(92vw, 320px)',
-                  padding: '1.25rem 1.35rem',
-                  background: 'rgba(255,255,255,0.98)',
-                  backdropFilter: 'blur(16px)',
-                  WebkitBackdropFilter: 'blur(16px)',
-                  boxShadow: '0 12px 40px rgba(0,0,0,0.08)',
-                  border: '1px solid rgba(10,10,10,0.06)',
-                }}
-              >
-                <p style={{
-                  fontFamily: 'Ribes, serif',
-                  fontSize: '0.55rem',
-                  letterSpacing: '0.16em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(10,10,10,0.35)',
-                  marginBottom: '0.65rem',
-                }}>
-                  {navigation.trembleGroupTitle}
-                </p>
-                <ul style={{ listStyle: 'none', marginBottom: '1.1rem' }}>
-                  {creationLinks.tremble.map(({ href, label }) => (
-                    <li key={href} style={{ marginBottom: '0.45rem' }}>
-                      <Link
-                        href={href}
-                        onClick={() => setCreationOpen(false)}
-                        style={{
-                          fontFamily: 'Ribes, serif',
-                          fontWeight: 300,
-                          fontSize: '0.82rem',
-                          color: pathname === href ? 'var(--blue)' : 'var(--black)',
-                          textDecoration: 'none',
-                        }}
-                      >
-                        {label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-                <ul style={{ listStyle: 'none', borderTop: '1px solid rgba(10,10,10,0.06)', paddingTop: '0.85rem' }}>
-                  {creationLinks.direct.map(({ href, label }) => (
-                    <li key={href} style={{ marginBottom: '0.45rem' }}>
-                      <Link
-                        href={href}
-                        onClick={() => setCreationOpen(false)}
-                        style={{
-                          fontFamily: 'Ribes, serif',
-                          fontWeight: 300,
-                          fontSize: '0.82rem',
-                          color: pathname === href ? 'var(--blue)' : 'var(--black)',
-                          textDecoration: 'none',
-                        }}
-                      >
-                        {label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            </div>
-          </li>
           {[
-            { href: '/presentation', label: 'Présentation' },
-            { href: '/contact', label: 'Contact' },
-          ].map(({ href, label }) => (
+            { href: '/projets', label: navigation.creationButtonLabel, active: creationActive },
+            { href: '/presentation', label: 'Présentation', active: pathname === '/presentation' },
+            { href: '/contact', label: 'Contact', active: pathname === '/contact' },
+          ].map(({ href, label, active }) => (
             <li key={href}>
               <Link
                 href={href}
-                style={linkStyle(pathname === href, textColor, textColorDim)}
-                onMouseEnter={(e) => { e.currentTarget.style.color = textColor }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = pathname === href ? textColor : textColorDim }}
+                className="nav-link"
+                aria-current={active ? 'page' : undefined}
               >
                 {label}
               </Link>
@@ -353,82 +237,24 @@ export default function Navbar({ navigation }: { navigation: NavigationCms }) {
             Index
           </Link>
 
-          <button
-            type="button"
-            aria-expanded={mobileCreationOpen}
-            onClick={() => setMobileCreationOpen(v => !v)}
+          {/* Même logique qu'en desktop : un lien, pas un accordéon. */}
+          <Link
+            href="/projets"
+            onClick={() => setMenuOpen(false)}
+            aria-current={creationActive ? 'page' : undefined}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              width: '100%',
-              background: 'none',
-              border: 'none',
+              display: 'block',
               fontFamily: 'Ribes, Georgia, serif',
               fontWeight: 300,
               fontSize: '1.5rem',
               color: creationActive ? 'var(--blue)' : 'var(--black)',
               letterSpacing: '0.05em',
-              cursor: 'pointer',
-              marginBottom: mobileCreationOpen ? '0.75rem' : '1.5rem',
-              padding: 0,
+              textDecoration: 'none',
+              marginBottom: '1.5rem',
             }}
           >
             {navigation.creationButtonLabel}
-            <span style={{ fontSize: '0.9rem', opacity: 0.45 }}>{mobileCreationOpen ? '−' : '+'}</span>
-          </button>
-
-          {mobileCreationOpen && (
-            <div style={{ paddingLeft: '0.5rem', marginBottom: '1.5rem' }}>
-              <p style={{
-                fontFamily: 'Ribes, serif',
-                fontSize: '0.6rem',
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase',
-                color: 'rgba(10,10,10,0.35)',
-                marginBottom: '0.65rem',
-              }}>
-                {navigation.trembleGroupTitle}
-              </p>
-              {creationLinks.tremble.map(({ href, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  onClick={() => setMenuOpen(false)}
-                  style={{
-                    display: 'block',
-                    fontFamily: 'Ribes, serif',
-                    fontWeight: 300,
-                    fontSize: '1.05rem',
-                    color: pathname === href ? 'var(--blue)' : 'rgba(10,10,10,0.75)',
-                    textDecoration: 'none',
-                    marginBottom: '0.65rem',
-                  }}
-                >
-                  {label}
-                </Link>
-              ))}
-              <div style={{ height: '1px', background: 'rgba(10,10,10,0.08)', margin: '0.85rem 0' }} />
-              {creationLinks.direct.map(({ href, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  onClick={() => setMenuOpen(false)}
-                  style={{
-                    display: 'block',
-                    fontFamily: 'Ribes, serif',
-                    fontWeight: 300,
-                    fontSize: '1.05rem',
-                    color: pathname === href ? 'var(--blue)' : 'rgba(10,10,10,0.75)',
-                    textDecoration: 'none',
-                    marginBottom: '0.65rem',
-                  }}
-                >
-                  {label}
-                </Link>
-              ))}
-            </div>
-          )}
+          </Link>
 
           {[
             { href: '/presentation', label: 'Présentation' },

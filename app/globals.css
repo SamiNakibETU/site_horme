@@ -391,6 +391,32 @@ html.js-ready [data-animate-text] {
   }
 }
 
+/* ─── Liens de navigation ─────────────────────────────────────────────────────
+   La couleur vient de deux variables posées sur la <nav> selon le thème de la
+   section survolée. Le survol est donc géré en CSS : piloté en JavaScript par
+   mutation de style inline, il figeait la couleur et ne suivait plus la bascule
+   clair/sombre au défilement. */
+.nav-link {
+  font-family: 'Ribes', Georgia, serif;
+  font-weight: 400;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--nav-ink-dim);
+  text-decoration: none;
+  transition: color 300ms var(--ease-out), transform 160ms var(--ease-out);
+}
+
+.nav-link[aria-current='page'] {
+  color: var(--nav-ink);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-link:hover { color: var(--nav-ink); }
+}
+
+.nav-link:active { transform: scale(0.96); }
+
 /* ─── États d'interaction ─────────────────────────────────────────────────────
    Le site n'avait aucun style de focus : naviguer au clavier revenait à se
    déplacer à l'aveugle, sans jamais savoir où l'on se trouve. */
