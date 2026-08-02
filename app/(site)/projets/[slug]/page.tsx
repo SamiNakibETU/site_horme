@@ -20,7 +20,13 @@ export default async function ProjectPage({ params }: { params: { slug: string }
       className="project-detail"
       style={{
         display: 'flex',
-        height: '100vh',
+        height: '100dvh',
+        // La page démarre sous la barre de navigation. Sans ça, la colonne de
+        // photos défile derrière elle : le texte du menu, en thème clair pour
+        // la colonne blanche de gauche, devient illisible sur les images à
+        // droite. Le thème ne se choisit que verticalement, il ne peut pas
+        // être juste des deux côtés d'une mise en page scindée à la verticale.
+        paddingTop: 'var(--nav-height)',
         overflow: 'hidden',
         background: `
           radial-gradient(ellipse 50% 40% at 20% 60%, rgba(28,76,244,0.07) 0%, transparent 55%),
@@ -40,109 +46,58 @@ export default async function ProjectPage({ params }: { params: { slug: string }
         overflowY: 'auto',
       }}>
         <div>
-          <Link
-            href="/projets"
-            style={{
-              fontFamily: 'Ribes, serif',
-              fontWeight: 400,
-              fontSize: '0.6rem',
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: 'rgba(10,10,10,0.3)',
-              textDecoration: 'none',
-              display: 'block',
-              marginBottom: '3rem',
-              marginTop: '3.5rem',
-              transition: 'color 0.2s',
-            }}
-          >
+          <Link href="/projets" className="ed-link" style={{ marginBottom: '2.5rem' }}>
             ← Créations
           </Link>
 
-          <h1 style={{
-            fontFamily: 'Ribes, Georgia, serif',
-            fontWeight: 300,
-            fontSize: 'clamp(1.4rem, 2.5vw, 2.2rem)',
-            lineHeight: 1.15,
-            color: 'var(--black)',
-            marginBottom: '0.75rem',
-          }}>
+          <h1 className="ed-display" style={{ fontSize: 'var(--step-2)', marginBottom: '0.5rem' }}>
             {project.title}
           </h1>
 
           {project.subtitle && (
             <p style={{
-              fontFamily: 'Ribes, serif',
+              fontFamily: 'Ribes, Georgia, serif',
               fontWeight: 300,
-              fontSize: '0.9rem',
-              color: 'rgba(10,10,10,0.4)',
-              marginBottom: '1.5rem',
+              fontSize: '0.95rem',
+              color: 'var(--ink-soft)',
+              marginBottom: '1.75rem',
             }}>
               {project.subtitle}
             </p>
           )}
 
-          <div style={{ marginBottom: '2rem' }}>
-            <p style={{
-              fontFamily: 'Ribes, serif',
-              fontWeight: 400,
-              fontSize: '0.6rem',
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: 'rgba(10,10,10,0.3)',
-              marginBottom: '0.25rem',
-            }}>
+          {/* Fiche technique, posée sous un filet. Les gris sont remontés à
+              --ink-soft : l'ancien rgba(10,10,10,0.3) passait sous le seuil de
+              contraste 3:1 et devenait illisible en plein jour. */}
+          <dl style={{
+            borderTop: '1px solid var(--rule)',
+            paddingTop: '1rem',
+            marginBottom: '2rem',
+            display: 'grid',
+            gap: '0.35rem',
+          }}>
+            <div className="ed-caption" style={{ marginTop: 0 }}>
               {project.type} · {project.year}
-            </p>
+            </div>
             {project.location && (
-              <p style={{
-                fontFamily: 'Ribes, serif',
-                fontWeight: 400,
-                fontSize: '0.6rem',
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase',
-                color: 'rgba(10,10,10,0.3)',
-                marginBottom: '0.25rem',
-              }}>
-                {project.location}
-              </p>
+              <div className="ed-caption" style={{ marginTop: 0 }}>{project.location}</div>
             )}
             {project.photographer.length > 0 && (
-              <p style={{
-                fontFamily: 'Ribes, serif',
-                fontWeight: 400,
-                fontSize: '0.6rem',
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase',
-                color: 'rgba(10,10,10,0.3)',
-              }}>
-                Photos : {project.photographer.join(', ')}
-              </p>
+              <div className="ed-caption" style={{ marginTop: 0 }}>
+                Photos · {project.photographer.join(', ')}
+              </div>
             )}
-          </div>
+          </dl>
 
           {project.description && (
-            <p style={{
-              fontFamily: 'Ribes, serif',
-              fontWeight: 300,
-              fontSize: '0.85rem',
-              lineHeight: 1.8,
-              color: 'rgba(10,10,10,0.55)',
-            }}>
+            <p className="ed-body" style={{ fontSize: '0.9rem' }}>
               {project.description}
             </p>
           )}
         </div>
 
-        <p style={{
-          fontFamily: 'Ribes, serif',
-          fontWeight: 400,
-          fontSize: '0.6rem',
-          letterSpacing: '0.14em',
-          textTransform: 'uppercase',
-          color: 'rgba(10,10,10,0.2)',
-        }}>
-          {project.images.length} images
+        <p className="ed-caption" style={{ marginTop: '2rem' }}>
+          {project.images.length}&nbsp;image{project.images.length > 1 ? 's' : ''}
         </p>
       </aside>
 

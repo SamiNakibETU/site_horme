@@ -27,6 +27,11 @@
   --black:   #0A0A0A;
   --gutter:  clamp(1.5rem, 4vw, 4rem);
 
+  /* Hauteur de la barre de navigation : 0.75rem de marge haute et basse
+     autour d'un logo de 44px. Sert aux pages qui doivent commencer sous
+     elle, la barre n'ayant aucun fond pour protéger sa lisibilité. */
+  --nav-height: 4.25rem;
+
   /* Courbes d'accélération. Les easings natifs du navigateur sont trop mous :
      ils n'ont pas le mordant qui fait lire une animation comme intentionnelle. */
   --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
@@ -153,6 +158,10 @@ body {
   padding-bottom: 0.35em;
 }
 
+/* Le soulignement est présent au repos, à faible opacité, et se renforce au
+   survol. Un soulignement qui n'apparaît qu'au survol ne signale rien tant
+   qu'on ne l'a pas déjà trouvé : le lien doit se lire comme cliquable avant
+   qu'on pointe dessus, pas après. */
 .ed-link::after {
   content: '';
   position: absolute;
@@ -161,13 +170,13 @@ body {
   height: 1px;
   width: 100%;
   background: currentColor;
-  transform: scaleX(0);
+  opacity: 0.35;
   transform-origin: left;
-  transition: transform 320ms var(--ease-out);
+  transition: opacity 240ms var(--ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .ed-link:hover::after { transform: scaleX(1); }
+  .ed-link:hover::after { opacity: 1; }
 }
 
 /* Entrée d'une photo de la planche-contact. Fondu seul, sans déplacement :
