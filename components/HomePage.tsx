@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import type { Project } from '@/data/projects'
+import { documentedProjects, undocumentedProjects, type Project } from '@/data/projects'
 import type { HomePageCms } from '@/lib/cms.types'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -310,7 +310,7 @@ function ProjectList({ projects }: { projects: Project[] }) {
 
   return (
     <div ref={containerRef} style={{ position: 'relative' }}>
-      {projects.map((p, i) => (
+      {documentedProjects(projects).map((p, i) => (
         <Link
           key={p.slug}
           href={`/projets/${p.slug}`}
@@ -408,6 +408,47 @@ function ProjectList({ projects }: { projects: Project[] }) {
           />
         )}
       </div>
+
+      {/* Créations sans photographie. Elles gardent leur place dans l'index
+          mais dans un registre plus discret : pas d'aperçu au survol, pas de
+          numérotation — rien ne promet une image qui n'existe pas encore. */}
+      {undocumentedProjects(projects).length > 0 && (
+        <div style={{ marginTop: '2.5rem', paddingTop: '1.75rem', borderTop: '1px solid var(--rule)' }}>
+          <p className="ed-caption" style={{ marginTop: 0, marginBottom: '1.25rem' }}>
+            Également au répertoire
+          </p>
+          {undocumentedProjects(projects).map(p => (
+            <Link
+              key={p.slug}
+              href={`/projets/${p.slug}`}
+              style={{
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: '1rem',
+                padding: '0.6rem 0',
+                textDecoration: 'none',
+                color: 'var(--ink-mid)',
+                fontFamily: 'Ribes, Georgia, serif',
+                fontWeight: 300,
+                fontSize: '1rem',
+                transition: 'color 240ms var(--ease-out)',
+              }}
+            >
+              <span style={{ flex: 1 }}>
+                {p.title}
+                {p.subtitle && (
+                  <span className="hide-mobile" style={{ color: 'var(--ink-soft)', marginLeft: '0.6rem', fontSize: '0.8rem' }}>
+                    {p.subtitle}
+                  </span>
+                )}
+              </span>
+              <span style={{ fontSize: '0.62rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-soft)' }}>
+                {p.year}
+              </span>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

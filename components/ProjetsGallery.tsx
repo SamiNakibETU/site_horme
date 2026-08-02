@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import type { Project } from '@/data/projects'
+import { documentedProjects, undocumentedProjects, type Project } from '@/data/projects'
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr]
@@ -31,10 +31,15 @@ function photoCreditLine(project: Project): string | null {
  * doit donc pas demander de viser.
  */
 export default function ProjetsGallery({ projects }: { projects: Project[] }) {
+  // Seules les créations photographiées alimentent la planche-contact ; les
+  // autres sont listées à part, en bas de page.
+  const withPhotos = useMemo(() => documentedProjects(projects), [projects])
+  const withoutPhotos = useMemo(() => undocumentedProjects(projects), [projects])
+
   // Ordre stable, identique sur le serveur et au premier rendu client.
   const ordered = useMemo<PoolEntry[]>(
-    () => projects.flatMap((p, idx) => p.images.map(src => ({ src, projectIdx: idx }))),
-    [projects],
+    () => withPhotos.flatMap((p, idx) => p.images.map(src => ({ src, projectIdx: idx }))),
+    [withPhotos],
   )
 
   // Le mélange n'a lieu qu'APRÈS le montage. Appeler Math.random() pendant le
@@ -45,7 +50,7 @@ export default function ProjetsGallery({ projects }: { projects: Project[] }) {
 
   const [index, setIndex] = useState(0)
   const current = pool[index]
-  const project = projects[current?.projectIdx ?? 0]
+  const project = withPhotos[current?.projectIdx ?? 0]
   const credit = project ? photoCreditLine(project) : null
 
   const next = useCallback(() => {
@@ -81,7 +86,8 @@ export default function ProjetsGallery({ projects }: { projects: Project[] }) {
         cursor: 'pointer',
         background: 'var(--white)',
         display: 'grid',
-        gridTemplateRows: 'auto 1fr auto',
+        // Titres, image (qui absorbe l'espace restant), métadonnées, index.
+        gridTemplateRows: 'auto 1fr auto auto',
       }}
     >
       {/* Bandeau des créations. `stopPropagation` sur chaque lien : sans lui,
@@ -95,7 +101,7 @@ export default function ProjetsGallery({ projects }: { projects: Project[] }) {
           padding: 'calc(var(--gutter) + 3.5rem) var(--gutter) 0',
         }}
       >
-        {projects.map((p, i) => {
+        {withPhotos.map((p, i) => {
           const active = current.projectIdx === i
           return (
             <Link
@@ -212,6 +218,54 @@ export default function ProjetsGallery({ projects }: { projects: Project[] }) {
           </Link>
         </div>
       </footer>
+
+      {/* Créations sans photographie. Elles ne peuvent pas figurer dans la
+          planche-contact, mais doivent rester atteignables : une ligne discrète
+          suffit, et dire « sans visuel » est plus honnête que de les mêler aux
+          autres avec un cadre vide. */}
+      {withoutPhotos.length > 0 && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            flexWrap: 'wrap',
+            gap: '0.5rem 1.5rem',
+            padding: '0 var(--gutter) clamp(1rem, 3vh, 1.75rem)',
+            borderTop: '1px solid var(--rule)',
+            marginTop: '-0.5rem',
+            paddingTop: '1rem',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: 'Ribes, Georgia, serif',
+              fontSize: '0.6rem',
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              color: 'var(--ink-soft)',
+            }}
+          >
+            Sans visuel
+          </span>
+          {withoutPhotos.map(p => (
+            <Link
+              key={p.slug}
+              href={`/projets/${p.slug}`}
+              onClick={e => e.stopPropagation()}
+              style={{
+                fontFamily: 'Ribes, Georgia, serif',
+                fontSize: '0.72rem',
+                color: 'var(--ink-mid)',
+                textDecoration: 'none',
+                transition: 'color 240ms var(--ease-out)',
+              }}
+            >
+              {p.title}
+              {p.subtitle ? ` · ${p.subtitle}` : ''}
+            </Link>
+          ))}
+        </div>
+      )}
 
       {/* Précharge la vue suivante pour que le fondu ne montre jamais de vide. */}
       {pool.length > 1 && (
