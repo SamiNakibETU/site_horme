@@ -55,10 +55,14 @@ function normalizeSanityProject(row: SanityProjectRow): Project | null {
     .filter(r => r.url.length > 0)
 
   const images = rows.map(r => r.url)
-  const coverImage =
-    row.coverImage ||
-    images[0] ||
-    '/assets/images/khormos/yse-02.jpg'
+
+  // Aucun repli sur une image d'une autre création. Le code retombait ici sur
+  // une photo de Khormo(s) codée en dur : une création sans visuel se serait
+  // affichée avec l'image d'un autre spectacle, créditée à son photographe.
+  // Une fausse attribution est pire qu'une absence — on assume le vide, et
+  // l'interface regroupe ces créations à part.
+  const coverImage = row.coverImage || images[0] || ''
+
   return {
     slug: row.slug,
     title: row.title,
@@ -66,10 +70,12 @@ function normalizeSanityProject(row: SanityProjectRow): Project | null {
     type: normalizeType(row.type),
     year: row.year,
     location: row.location,
-    photographer: row.photographer?.length ? row.photographer : ['À compléter'],
+    // Liste vide plutôt que « À compléter » : afficher « Photos : À compléter »
+    // sur le site public expose une note de travail interne aux visiteurs.
+    photographer: row.photographer?.filter(p => p?.trim() && !/^à compléter$/i.test(p.trim())) ?? [],
     description: row.description,
     coverImage,
-    images: images.length ? images : [coverImage],
+    images,
     galleryItems: rows.length ? rows : undefined,
     video: row.video || undefined,
   }

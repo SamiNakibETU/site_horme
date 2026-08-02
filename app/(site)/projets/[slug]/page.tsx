@@ -97,11 +97,31 @@ export default async function ProjectPage({ params }: { params: { slug: string }
         </div>
 
         <p className="ed-caption" style={{ marginTop: '2rem' }}>
-          {project.images.length}&nbsp;image{project.images.length > 1 ? 's' : ''}
+          {project.images.length > 0
+            ? `${project.images.length} image${project.images.length > 1 ? 's' : ''}`
+            : 'Sans visuel'}
         </p>
       </aside>
 
       <main className="project-images" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+        {/* Une création peut ne pas encore avoir de photographies. On le dit,
+            plutôt que de laisser une colonne vide qui ressemble à une panne. */}
+        {project.images.length === 0 && !project.video && (
+          <div
+            style={{
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 'var(--gutter)',
+            }}
+          >
+            <p className="ed-caption" style={{ marginTop: 0, textAlign: 'center' }}>
+              Les photographies de cette création<br />seront publiées prochainement
+            </p>
+          </div>
+        )}
+
         {project.video && (
           <div style={{ width: '100%', aspectRatio: '16/9' }}>
             <video
