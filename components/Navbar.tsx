@@ -12,7 +12,6 @@ function isCreationPath(pathname: string) {
 export default function Navbar({ navigation }: { navigation: NavigationCms }) {
   const pathname = usePathname()
   const [navTheme, setNavTheme] = useState<'light' | 'dark'>('dark')
-  const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const navRef = useRef<HTMLElement>(null)
 
@@ -32,12 +31,6 @@ export default function Navbar({ navigation }: { navigation: NavigationCms }) {
         }
       })
       setNavTheme(currentTheme)
-
-      // La barre est fixe et sans fond : au-delà du héro, le contenu de la page
-      // défile dessous et les textes se superposent aux liens. On fait donc
-      // apparaître un voile dès qu'on quitte le haut de page — et seulement là,
-      // pour que le héro reste plein cadre.
-      setScrolled(window.scrollY > 24)
     }
 
     window.addEventListener('scroll', updateTheme, { passive: true })
@@ -77,26 +70,12 @@ export default function Navbar({ navigation }: { navigation: NavigationCms }) {
           // sans qu'aucun style inline ne vienne figer une couleur périmée.
           ['--nav-ink' as string]: textColor,
           ['--nav-ink-dim' as string]: textColorDim,
-          // Voile translucide accordé au thème de la section survolée. Absent en
-          // haut de page pour laisser la vidéo du héro occuper tout le cadre.
-          background: scrolled
-            ? isDark
-              ? 'rgba(10,10,10,0.55)'
-              : 'rgba(255,255,255,0.72)'
-            : 'transparent',
-          backdropFilter: scrolled ? 'blur(14px) saturate(180%)' : 'none',
-          WebkitBackdropFilter: scrolled ? 'blur(14px) saturate(180%)' : 'none',
-          borderBottom: `1px solid ${
-            scrolled
-              ? isDark
-                ? 'rgba(255,255,255,0.08)'
-                : 'rgba(10,10,10,0.06)'
-              : 'transparent'
-          }`,
-          // Propriétés listées explicitement plutôt que `all` : `all` anime
-          // aussi la couleur du texte et le filtre, ce qui saccade au défilement.
-          transition:
-            'background 400ms var(--ease-out), backdrop-filter 400ms var(--ease-out), border-color 400ms var(--ease-out)',
+          // Aucun fond, aucun filet : la barre n'existe visuellement que par
+          // ses mots. Seule leur couleur bascule selon la section survolée,
+          // via data-nav-theme. Un voile translucide protégerait mieux la
+          // lisibilité quand du texte passe dessous, mais introduirait une
+          // surface là où le parti pris est justement de n'en avoir aucune.
+          background: 'transparent',
         }}
       >
         <Link
