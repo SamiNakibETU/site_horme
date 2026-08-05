@@ -567,10 +567,18 @@ export default function HomePage({ projects, home }: { projects: Project[]; home
         </div>
       </section>
 
+      {/* Les trois sections qui suivent n'ont volontairement PAS de padding
+          symétrique haut/bas : chacune s'ouvre déjà visuellement sur son
+          SectionLabel (numéro + filet). Un padding bas généreux en plus du
+          padding haut de la section suivante additionnait deux grands
+          espaces — jusqu'à 13rem de vide nu entre deux sections sur grand
+          écran, qui se lisait comme un trou plutôt qu'une respiration. */}
       <section
         data-nav-theme="light"
         style={{
-          padding: 'clamp(3rem, 7vw, 6rem) var(--gutter)',
+          paddingTop: 'clamp(3rem, 7vw, 6rem)',
+          paddingBottom: 'clamp(1.5rem, 3vw, 2.5rem)',
+          paddingInline: 'var(--gutter)',
           position: 'relative',
         }}
       >
@@ -599,7 +607,9 @@ export default function HomePage({ projects, home }: { projects: Project[]; home
       <section
         data-nav-theme="light"
         style={{
-          padding: 'clamp(3rem, 8vw, 7rem) var(--gutter)',
+          paddingTop: 'clamp(3rem, 7vw, 6rem)',
+          paddingBottom: 'clamp(1.5rem, 3vw, 2.5rem)',
+          paddingInline: 'var(--gutter)',
           position: 'relative',
         }}
       >
@@ -612,19 +622,7 @@ export default function HomePage({ projects, home }: { projects: Project[]; home
           <p className="ed-body" style={{ marginBottom: '2.5rem' }}>
             {home.imagesSectionBody}
           </p>
-          <Link
-            href="/presentation"
-            style={{
-              fontFamily: 'Ribes, serif',
-              fontWeight: 400,
-              fontSize: '0.65rem',
-              letterSpacing: '0.15em',
-              textTransform: 'uppercase',
-              color: 'var(--blue)',
-              textDecoration: 'none',
-              transition: 'color 0.2s',
-            }}
-          >
+          <Link href="/presentation" className="ed-link">
             {home.imagesSectionCtaLabel}
           </Link>
         </div>
@@ -633,7 +631,9 @@ export default function HomePage({ projects, home }: { projects: Project[]; home
       <section
         data-nav-theme="light"
         style={{
-          padding: 'clamp(4rem, 10vw, 8rem) var(--gutter)',
+          paddingTop: 'clamp(3rem, 7vw, 6rem)',
+          paddingBottom: 'clamp(3rem, 6vw, 5rem)',
+          paddingInline: 'var(--gutter)',
         }}
       >
         <div style={{ maxWidth: '60rem', margin: '0 auto' }}>
