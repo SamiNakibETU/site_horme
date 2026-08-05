@@ -2,6 +2,7 @@ import type { Project } from '@/data/projects'
 import { projects as staticProjects } from '@/data/projects'
 import { sanityConfigured } from '@/lib/sanity.client'
 import { sanityFetch } from '@/lib/sanity.fetch'
+import { sanityImageUrl } from '@/lib/sanityImage'
 
 const projectsQuery = `*[_type == "project"] | order(year desc) {
   "slug": slug.current,
@@ -48,7 +49,11 @@ function normalizeSanityProject(row: SanityProjectRow): Project | null {
   if (!row.slug || !row.title) return null
   const rows = (row.galleryRows || [])
     .map(r => ({
-      url: (r.url || '').trim(),
+      // 2000px de large suffit à tout affichage sur ce site (le carrousel le
+      // plus grand vise 1920) ; les photos envoyées par la compagnie
+      // dépassent souvent largement cette taille. Contraindre ici évite à
+      // Next de retélécharger la pleine résolution avant de la redimensionner.
+      url: sanityImageUrl((r.url || '').trim(), 2000),
       alt: (r.alt || '').trim() || undefined,
       credit: (r.credit || '').trim() || undefined,
     }))
@@ -61,7 +66,7 @@ function normalizeSanityProject(row: SanityProjectRow): Project | null {
   // affichée avec l'image d'un autre spectacle, créditée à son photographe.
   // Une fausse attribution est pire qu'une absence — on assume le vide, et
   // l'interface regroupe ces créations à part.
-  const coverImage = row.coverImage || images[0] || ''
+  const coverImage = sanityImageUrl(row.coverImage, 2000) || images[0] || ''
 
   return {
     slug: row.slug,

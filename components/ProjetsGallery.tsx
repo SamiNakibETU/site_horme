@@ -53,6 +53,12 @@ export default function ProjetsGallery({ projects }: { projects: Project[] }) {
   const project = withPhotos[current?.projectIdx ?? 0]
   const credit = project ? photoCreditLine(project) : null
 
+  // Suit quel index a fini de charger, plutôt qu'un simple booléen : au clic
+  // suivant, le squelette doit réapparaître même si l'image précédente était
+  // déjà chargée. Comparer à `index` fait ça sans effet supplémentaire.
+  const [loadedIndex, setLoadedIndex] = useState<number | null>(null)
+  const isLoaded = loadedIndex === index
+
   const next = useCallback(() => {
     if (pool.length > 1) setIndex(i => (i + 1) % pool.length)
   }, [pool.length])
@@ -133,6 +139,7 @@ export default function ProjetsGallery({ projects }: { projects: Project[] }) {
           fragile à l'intérieur d'une grille. Ici la photo se contraint elle-même
           à l'espace disponible et se centre, sans dépendre de la piste. */}
       <div
+        className={isLoaded ? undefined : 'img-skeleton'}
         style={{
           minHeight: 0,
           display: 'flex',
@@ -149,7 +156,11 @@ export default function ProjetsGallery({ projects }: { projects: Project[] }) {
           height={1280}
           priority
           sizes="90vw"
-          className="gallery-photo"
+          onLoad={() => setLoadedIndex(index)}
+          // Pas de `gallery-photo` ici : son animation à durée fixe
+          // entrerait en concurrence avec `.img-reveal`, qui se déclenche sur
+          // le chargement réel plutôt que sur un minutage arbitraire.
+          className={`img-reveal${isLoaded ? ' is-loaded' : ''}`}
           style={{
             width: 'auto',
             height: 'auto',

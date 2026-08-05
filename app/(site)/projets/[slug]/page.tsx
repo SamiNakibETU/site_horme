@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getAllProjects, getProjectBySlug } from '@/lib/getProjects'
+import RevealImage from '@/components/RevealImage'
 
 export const revalidate = 3600
 
@@ -164,11 +164,15 @@ export default async function ProjectPage({ params }: { params: { slug: string }
           const alt = meta?.alt?.trim() || `${project.title} — image ${i + 1}`
           return (
             <div key={`${img}-${i}`} style={{ width: '100%', position: 'relative' }}>
-              <Image
+              <RevealImage
                 src={img}
                 alt={alt}
                 width={1200}
                 height={900}
+                // Seule la première photo est prioritaire : les suivantes ne
+                // sont pas encore visibles à l'arrivée sur la page, inutile
+                // de les faire concurrencer la première pour la bande passante.
+                priority={i === 0}
                 style={{ width: '100%', height: 'auto', display: 'block', margin: 0, padding: 0 }}
               />
               {meta?.credit && (

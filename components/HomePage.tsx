@@ -74,6 +74,9 @@ function CinematicScroll({ slides }: { slides: CinematicSlide[] }) {
                 src={slide.src}
                 alt={slide.alt ?? ''}
                 fill
+                // Sans `sizes`, Next suppose 100vw et tire une image plein
+                // écran pour une vignette qui n'occupe que 70% de la largeur.
+                sizes="70vw"
                 className={slide.objectFit === 'contain' ? 'object-contain' : 'object-cover'}
                 style={{
                   objectPosition: slide.objectPosition || 'center',
@@ -147,6 +150,7 @@ function CinematicScroll({ slides }: { slides: CinematicSlide[] }) {
                     src={slide.src}
                     alt={slide.alt ?? ''}
                     fill
+                    sizes="45vw"
                     className={fit === 'contain' ? 'object-contain' : 'object-cover'}
                     style={{
                       transition: 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
@@ -403,6 +407,9 @@ function ProjectList({ projects }: { projects: Project[] }) {
             src={hoverImg}
             alt=""
             fill
+            // Boîte fixe de 200px : sans cette valeur, Next demandait une
+            // image pleine largeur d'écran pour cette vignette.
+            sizes="200px"
             className="gallery-photo"
             style={{ objectFit: 'cover' }}
           />
@@ -464,6 +471,7 @@ function slidesFromCms(home: HomePageCms): CinematicSlide[] {
 
 export default function HomePage({ projects, home }: { projects: Project[]; home: HomePageCms }) {
   const slideshowSlides = slidesFromCms(home)
+  const [heroReady, setHeroReady] = useState(false)
 
   return (
     <main style={{
@@ -480,10 +488,29 @@ export default function HomePage({ projects, home }: { projects: Project[]; home
         data-nav-theme="dark"
         style={{ position: 'relative', height: '100dvh', overflow: 'hidden', background: '#000' }}
       >
+        {/* Le poster vit dans un <img> séparé, sous la vidéo, et reste visible
+            en permanence : c'est du vrai contenu, pas un squelette. La vidéo
+            se fond par-dessus une fois qu'elle joue réellement, au lieu de
+            remplacer le poster d'un coup dès qu'une première image existe. */}
+        {home.heroPosterUrl && (
+          <img
+            src={home.heroPosterUrl}
+            alt=""
+            aria-hidden="true"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        )}
+
         {/* `preload="metadata"` et non "auto" : la vidéo pèse plusieurs Mo et,
             en "auto", le navigateur la télécharge intégralement avant tout le
-            reste — polices et images comprises. Le poster s'affiche
-            instantanément pendant qu'elle se charge, au lieu d'un aplat vide. */}
+            reste — polices et images comprises.
+
+            `data-ready` piloté en CSS, pas en style inline : sans JavaScript,
+            aucune classe `js-ready` n'est jamais posée sur <html> (voir
+            ScrollAnimations), donc le sélecteur ci-dessous ne s'applique
+            jamais et la vidéo reste pleinement visible par défaut. Un style
+            inline `opacity: heroReady ? 1 : 0` aurait, lui, rendu la vidéo
+            invisible pour quiconque n'exécute pas ce composant côté client. */}
         <video
           autoPlay
           loop
@@ -494,8 +521,17 @@ export default function HomePage({ projects, home }: { projects: Project[]; home
           src={home.heroVideoUrl}
           aria-hidden="true"
           tabIndex={-1}
+          data-ready={heroReady}
+          onPlaying={() => setHeroReady(true)}
+          className="hero-video"
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
         />
+
+        {/* Repère d'attente minimaliste : un simple trait qui balaie, le temps
+            que la vidéo démarre réellement. Disparaît dès la première image
+            jouée, absent si l'image de chargement occupe déjà tout l'écran. */}
+        <span aria-hidden="true" data-ready={heroReady} className="hero-loading-hint" />
+
         <div style={{
           position: 'absolute', inset: 0,
           background: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.6) 100%)',

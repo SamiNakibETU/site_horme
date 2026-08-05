@@ -18,6 +18,7 @@ import type {
 import { sanityConfigured } from '@/lib/sanity.client'
 import { sanityFetch } from '@/lib/sanity.fetch'
 import { SANITY_SINGLETON_IDS } from '@/lib/sanity.ids'
+import { sanityImageUrl } from '@/lib/sanityImage'
 
 const qSettings = `*[_id == $id][0]{
   metaTitle,
@@ -100,15 +101,17 @@ function mergeHome(row: Record<string, unknown> | null): HomePageCms {
   const d = defaultHomePage
   if (!row) return d
   const rawSlides = (row.slides as HomePageCms['slides'] | undefined)?.filter(s => s?.url) ?? []
+  // 1920 : c'est la plus grande diapositive du carrousel plein écran, pas
+  // besoin de tirer plus large depuis le CDN.
   const slides = rawSlides.map(s => ({
-    url: s.url,
+    url: sanityImageUrl(s.url, 1920),
     alt: s.alt || '',
     objectFit: s.objectFit === 'contain' ? 'contain' as const : 'cover' as const,
     objectPosition: s.objectPosition || 'center',
   }))
   return {
     heroVideoUrl: (row.heroVideoUrl as string) || d.heroVideoUrl,
-    heroPosterUrl: (row.heroPosterUrl as string) || d.heroPosterUrl,
+    heroPosterUrl: sanityImageUrl(row.heroPosterUrl as string, 1920) || d.heroPosterUrl,
     heroTitle: (row.heroTitle as string) || d.heroTitle,
     heroLine1: (row.heroLine1 as string) || d.heroLine1,
     heroLine2: (row.heroLine2 as string) || d.heroLine2,
@@ -131,7 +134,9 @@ function mergeHome(row: Record<string, unknown> | null): HomePageCms {
 function mergePresentation(row: Record<string, unknown> | null): PresentationPageCms {
   const d = defaultPresentationPage
   if (!row) return d
-  const dancers = (row.dancers as PresentationPageCms['dancers'] | undefined)?.filter(x => x?.portraitUrl) ?? []
+  const dancers = ((row.dancers as PresentationPageCms['dancers'] | undefined)?.filter(x => x?.portraitUrl) ?? [])
+    // 1200 : les portraits n'occupent jamais plus de la moitié de l'écran.
+    .map(x => ({ ...x, portraitUrl: sanityImageUrl(x.portraitUrl, 1200) }))
   const intro = (row.intro as PortableTextBlock[] | undefined) ?? []
   return {
     kicker: (row.kicker as string) || d.kicker,
@@ -156,7 +161,9 @@ export async function getSiteSettings(): Promise<SiteSettingsCms> {
       ogTitle: (row.ogTitle as string) || (row.metaTitle as string) || defaultSiteSettings.ogTitle,
       ogDescription:
         (row.ogDescription as string) || (row.metaDescription as string) || defaultSiteSettings.ogDescription,
-      ogImage: (row.ogImage as string) || defaultSiteSettings.ogImage,
+      // 1200 : largeur standard d'une image Open Graph, pas besoin de plus
+      // pour une carte de partage.
+      ogImage: sanityImageUrl(row.ogImage as string, 1200) || defaultSiteSettings.ogImage,
     }
   } catch {
     return defaultSiteSettings
