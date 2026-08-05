@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -8,6 +9,31 @@ export const revalidate = 3600
 export async function generateStaticParams() {
   const projects = await getAllProjects()
   return projects.map(p => ({ slug: p.slug }))
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string }
+}): Promise<Metadata> {
+  const project = await getProjectBySlug(params.slug)
+  if (!project) return {}
+
+  const title = `${project.title} | Cie. Horme`
+  const description = project.description?.trim() || undefined
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      // C'est ce qui détermine l'aperçu affiché quand ce lien est partagé
+      // sur Instagram, WhatsApp ou dans un e-mail : sans elle, la carte de
+      // partage retombait sur l'image générique du site entier.
+      ...(project.coverImage ? { images: [{ url: project.coverImage }] } : {}),
+    },
+  }
 }
 
 export default async function ProjectPage({ params }: { params: { slug: string } }) {

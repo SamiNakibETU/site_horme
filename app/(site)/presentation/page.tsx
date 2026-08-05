@@ -1,15 +1,24 @@
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { PortableTextCms } from '@/components/PortableTextCms'
 import { defaultPresentationIntroFallback } from '@/lib/cms.defaults'
 import { getPresentationPage } from '@/lib/getCms'
+import { portableTextToPlain, truncate } from '@/lib/seo'
 
 export const revalidate = 3600
 
-export async function generateMetadata() {
+export async function generateMetadata(): Promise<Metadata> {
   const p = await getPresentationPage()
+  // Le champ « titre » de cette page contient volontairement le nom de la
+  // compagnie (c'est le grand titre affiché à l'écran) : le composer avec la
+  // marque produisait « Cie. Horme | Présentation | Cie. Horme ». Le titre
+  // de navigateur ne reprend donc plus ce champ.
+  const description = truncate(portableTextToPlain(p.intro)) || undefined
   return {
-    title: `${p.title} | Présentation | Cie. Horme`,
+    title: 'Présentation | Cie. Horme',
+    description,
+    openGraph: { title: 'Présentation | Cie. Horme', description },
   }
 }
 

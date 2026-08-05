@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { SITE_URL } from '@/lib/seo'
 
 /**
  * Layout racine — volontairement minimal.
@@ -11,6 +12,10 @@ import type { Metadata } from 'next'
  */
 export const metadata: Metadata = {
   title: 'Cie. Horme',
+  // Sert de base aux URLs relatives (images Open Graph, canonical) émises
+  // par les pages. Sans elle, Next.js les laisse relatives : invalides une
+  // fois partagées hors du site (Instagram, WhatsApp, e-mail).
+  metadataBase: new URL(SITE_URL),
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
