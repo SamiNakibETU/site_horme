@@ -16,6 +16,12 @@ export default function RevealImage({ className, onLoad, ...props }: ImageProps)
     <div className={loaded ? undefined : 'img-skeleton'}>
       <Image
         {...props}
+        // Ce composant ne sert qu'aux photos de créations, déjà dimensionnées
+        // à 2000px par sanityImageUrl à la lecture des données. Sans ce
+        // réglage, chaque photo repassait par l'optimiseur de Next avant de
+        // s'afficher — l'aller-retour serveur en plus était la vraie cause
+        // du délai constaté sur les fiches de création.
+        unoptimized
         onLoad={e => {
           setLoaded(true)
           onLoad?.(e)

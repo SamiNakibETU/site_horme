@@ -1,11 +1,12 @@
 'use client'
-import { useRef, useEffect, useState, useCallback } from 'react'
+import { useRef, useEffect, useMemo, useState, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { documentedProjects, undocumentedProjects, type Project } from '@/data/projects'
 import type { HomePageCms } from '@/lib/cms.types'
+import { sanityImageUrl } from '@/lib/sanityImage'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -77,6 +78,11 @@ function CinematicScroll({ slides }: { slides: CinematicSlide[] }) {
                 // Sans `sizes`, Next suppose 100vw et tire une image plein
                 // écran pour une vignette qui n'occupe que 70% de la largeur.
                 sizes="70vw"
+                // Déjà dimensionnée à 1920px par sanityImageUrl à la lecture
+                // des données : passer par l'optimiseur de Next ajoutait un
+                // aller-retour serveur pour un travail que le CDN de Sanity a
+                // déjà fait.
+                unoptimized
                 className={slide.objectFit === 'contain' ? 'object-contain' : 'object-cover'}
                 style={{
                   objectPosition: slide.objectPosition || 'center',
@@ -151,6 +157,7 @@ function CinematicScroll({ slides }: { slides: CinematicSlide[] }) {
                     alt={slide.alt ?? ''}
                     fill
                     sizes="45vw"
+                    unoptimized
                     className={fit === 'contain' ? 'object-contain' : 'object-cover'}
                     style={{
                       transition: 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
@@ -294,23 +301,37 @@ function SectionLabel({ num, children }: { num: string; children: React.ReactNod
 
 function ProjectList({ projects }: { projects: Project[] }) {
   const [hovered, setHovered] = useState<string | null>(null)
-  const [hoverImg, setHoverImg] = useState('')
   const [imgTop, setImgTop] = useState(0)
+  const [thumbLoaded, setThumbLoaded] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // Une miniature stable par création plutôt qu'une image tirée au hasard à
+  // chaque survol : avec Math.random(), survoler deux fois la même création
+  // demandait presque toujours une photo différente, donc un nouveau
+  // téléchargement à chaque fois — jamais mise en cache, toujours lente.
+  // 440px : suffisant pour une boîte de 200px même sur écran rétina.
+  const thumbs = useMemo(
+    () =>
+      new Map(
+        documentedProjects(projects).map(p => [
+          p.slug,
+          sanityImageUrl(p.images[0], 440) || p.images[0],
+        ]),
+      ),
+    [projects],
+  )
+
+  const hoverImg = hovered ? thumbs.get(hovered) ?? '' : ''
 
   const handleEnter = useCallback((slug: string, e: React.MouseEvent) => {
     setHovered(slug)
-    const project = projects.find(p => p.slug === slug)
-    if (project && project.images.length > 0) {
-      const rand = project.images[Math.floor(Math.random() * project.images.length)]
-      setHoverImg(rand)
-    }
+    setThumbLoaded(false)
     if (containerRef.current) {
       const cr = containerRef.current.getBoundingClientRect()
       const rr = (e.currentTarget as HTMLElement).getBoundingClientRect()
       setImgTop(rr.top - cr.top + rr.height / 2 - 90)
     }
-  }, [projects])
+  }, [])
 
   return (
     <div ref={containerRef} style={{ position: 'relative' }}>
@@ -385,7 +406,13 @@ function ProjectList({ projects }: { projects: Project[] }) {
         </Link>
       ))}
 
-      <div className="hide-mobile" style={{
+      {Array.from(thumbs.values()).map(src => (
+        <link key={src} rel="prefetch" as="image" href={src} />
+      ))}
+
+      <div
+        className={thumbLoaded ? 'hide-mobile' : 'hide-mobile img-skeleton'}
+        style={{
         position: 'absolute',
         right: '-2rem',
         top: imgTop,
@@ -407,10 +434,15 @@ function ProjectList({ projects }: { projects: Project[] }) {
             src={hoverImg}
             alt=""
             fill
-            // Boîte fixe de 200px : sans cette valeur, Next demandait une
-            // image pleine largeur d'écran pour cette vignette.
+            // `unoptimized` : la vignette est déjà à la bonne taille (dérivée
+            // à 440px par sanityImageUrl). La faire passer par l'optimiseur
+            // de Next ajoutait un aller-retour serveur pour une image que le
+            // CDN de Sanity sert déjà correctement dimensionnée — c'était la
+            // vraie cause de la lenteur au survol, plus que l'affichage.
+            unoptimized
             sizes="200px"
-            className="gallery-photo"
+            onLoad={() => setThumbLoaded(true)}
+            className={`gallery-photo img-reveal${thumbLoaded ? ' is-loaded' : ''}`}
             style={{ objectFit: 'cover' }}
           />
         )}

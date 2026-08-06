@@ -125,6 +125,9 @@ export default async function PresentationPage() {
                     alt={d.name}
                     fill
                     sizes="(max-width: 768px) 100vw, 50vw"
+                    // Déjà dimensionné à 1200px par sanityImageUrl : inutile
+                    // de repasser par l'optimiseur de Next.
+                    unoptimized
                     style={{ objectFit: 'contain', objectPosition: 'top center' }}
                   />
                 </div>

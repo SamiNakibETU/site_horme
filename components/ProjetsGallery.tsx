@@ -156,6 +156,12 @@ export default function ProjetsGallery({ projects }: { projects: Project[] }) {
           height={1280}
           priority
           sizes="90vw"
+          // Déjà dimensionnée à 2000px par sanityImageUrl à la lecture des
+          // données : l'optimiseur de Next ajoutait un aller-retour serveur
+          // pour un travail que le CDN de Sanity a déjà fait. C'était la
+          // vraie source de lenteur au changement de photo, bien plus que
+          // le fondu lui-même.
+          unoptimized
           onLoad={() => setLoadedIndex(index)}
           // Pas de `gallery-photo` ici : son animation à durée fixe
           // entrerait en concurrence avec `.img-reveal`, qui se déclenche sur
