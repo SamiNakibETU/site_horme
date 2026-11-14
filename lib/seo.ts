@@ -29,3 +29,30 @@ export function truncate(text: string, max = 155): string {
   const cut = text.slice(0, max).replace(/\s+\S*$/, '')
   return `${cut}…`
 }
+
+/** Sérialise un objet JSON-LD sans permettre de sortir de la balise <script>. */
+export function jsonLd(data: unknown): string {
+  return JSON.stringify(data).replace(/</g, '\u003c')
+}
+
+type OrgInput = { siteName: string; metaDescription: string; ogImage: string }
+type FooterInput = { instagramUrl: string; email: string }
+
+/**
+ * Données structurées de la compagnie (schema.org/DanceGroup). Google s'en
+ * sert pour le panneau d'information et pour relier le site au compte
+ * Instagram.
+ */
+export function organizationJsonLd(s: OrgInput, f: FooterInput) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'DanceGroup',
+    name: s.siteName,
+    url: SITE_URL,
+    description: s.metaDescription,
+    ...(s.ogImage ? { image: s.ogImage } : {}),
+    ...(f.email ? { email: f.email } : {}),
+    sameAs: [f.instagramUrl].filter(u => /^https?:\/\//.test(u)),
+    address: { '@type': 'PostalAddress', addressLocality: 'Paris', addressCountry: 'FR' },
+  }
+}

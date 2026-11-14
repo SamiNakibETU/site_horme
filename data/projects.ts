@@ -1,28 +1,22 @@
-/** Une image de galerie (ordre = ordre dans le tableau ; crédit / alt depuis Sanity). */
-export type ProjectGalleryItem = {
-  url: string
-  alt?: string
-  credit?: string
-}
-
-export interface Project {
+/**
+ * Contenu de secours, utilisé uniquement quand Sanity n'est pas configuré
+ * (développement hors ligne). En production, tout vient du CMS.
+ */
+export interface StaticProject {
   slug: string
   title: string
   subtitle?: string
-  type: 'Festival' | 'Performance' | 'Événement' | 'Résidence'
+  type: string
   year: number
   location?: string
   photographer: string[]
   description?: string
-  coverImage: string
-  /** URLs pour listes / filmstrip (dérivé de la galerie). */
+  coverImage?: string
   images: string[]
-  /** Détail page : ordre, légendes, crédits par image. */
-  galleryItems?: ProjectGalleryItem[]
   video?: string
 }
 
-export const projects: Project[] = [
+export const projects: StaticProject[] = [
   {
     slug: 'khormos',
     title: 'Khorrmo(s)',
@@ -147,9 +141,3 @@ export const projects: Project[] = [
     images: [],
   },
 ]
-
-/** Créations disposant de photographies — celles qui alimentent la planche-contact. */
-export const documentedProjects = (all: Project[]) => all.filter(p => p.images.length > 0)
-
-/** Créations sans visuel, regroupées à part dans les listes. */
-export const undocumentedProjects = (all: Project[]) => all.filter(p => p.images.length === 0)

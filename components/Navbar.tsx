@@ -1,127 +1,126 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import type { NavigationCms } from '@/lib/cms.types'
 
-function isCreationPath(pathname: string) {
-  return pathname.startsWith('/creation') || pathname.startsWith('/projets')
-}
+const isCreationPath = (p: string) => p.startsWith('/creation') || p.startsWith('/projets')
 
-export default function Navbar({ navigation }: { navigation: NavigationCms }) {
+export default function Navbar({ navigation, siteName }: { navigation: NavigationCms; siteName: string }) {
   const pathname = usePathname()
   const [navTheme, setNavTheme] = useState<'light' | 'dark'>('dark')
+  const [hidden, setHidden] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const navRef = useRef<HTMLElement>(null)
+  const burgerRef = useRef<HTMLButtonElement>(null)
+  const firstLinkRef = useRef<HTMLAnchorElement>(null)
 
+  const links = [
+    { href: '/projets', label: navigation.creationButtonLabel, active: isCreationPath(pathname) },
+    { href: '/presentation', label: navigation.presentationLabel, active: pathname === '/presentation' },
+    { href: '/contact', label: navigation.contactLabel, active: pathname === '/contact' },
+  ]
+
+  // Thème du menu (texte blanc sur la vidéo, noir ailleurs) et masquage au
+  // défilement. Un seul écouteur, limité à une mesure par image affichée :
+  // l'ancienne version relançait la mesure à chaque événement de défilement,
+  // plus quatre minuteries de rattrapage.
   useEffect(() => {
-    const updateTheme = () => {
-      if (!navRef.current) return
-      const navBottom = navRef.current.getBoundingClientRect().bottom
-      const midY = navBottom - 10
+    let frame = 0
+    let lastY = window.scrollY
 
-      const sections = document.querySelectorAll('[data-nav-theme]')
-      let currentTheme: 'light' | 'dark' = 'light'
-
-      sections.forEach((section) => {
-        const rect = section.getBoundingClientRect()
-        if (rect.top <= midY && rect.bottom >= midY) {
-          currentTheme = (section.getAttribute('data-nav-theme') as 'light' | 'dark') || 'light'
-        }
+    const measure = () => {
+      frame = 0
+      const nav = navRef.current
+      if (!nav) return
+      const probe = nav.getBoundingClientRect().bottom - 10
+      let theme: 'light' | 'dark' = 'light'
+      document.querySelectorAll<HTMLElement>('[data-nav-theme]').forEach(section => {
+        const r = section.getBoundingClientRect()
+        if (r.top <= probe && r.bottom >= probe) theme = (section.dataset.navTheme as 'light' | 'dark') || 'light'
       })
-      setNavTheme(currentTheme)
+      setNavTheme(theme)
+
+      // La barre n'a pas de fond : quand du texte défile dessous, elle gêne la
+      // lecture. Elle s'efface donc en descendant et revient dès qu'on remonte,
+      // le geste naturel de quelqu'un qui cherche le menu.
+      const y = window.scrollY
+      if (Math.abs(y - lastY) > 6) {
+        setHidden(y > lastY && y > window.innerHeight * 0.6)
+        lastY = y
+      }
+    }
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(measure)
     }
 
-    window.addEventListener('scroll', updateTheme, { passive: true })
-    const timers = [50, 200, 500, 1000].map(ms => setTimeout(updateTheme, ms))
+    measure()
+    window.addEventListener('scroll', schedule, { passive: true })
+    window.addEventListener('resize', schedule)
     return () => {
-      window.removeEventListener('scroll', updateTheme)
-      timers.forEach(clearTimeout)
+      window.removeEventListener('scroll', schedule)
+      window.removeEventListener('resize', schedule)
+      if (frame) cancelAnimationFrame(frame)
     }
   }, [pathname])
+
+  const closeMenu = useCallback((restoreFocus = false) => {
+    setMenuOpen(false)
+    if (restoreFocus) burgerRef.current?.focus()
+  }, [])
 
   useEffect(() => {
     setMenuOpen(false)
+    setHidden(false)
   }, [pathname])
 
-  const isDark = navTheme === 'dark' && !menuOpen
-  const textColor = isDark ? '#FFFFFF' : '#0A0A0A'
-  const textColorDim = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(10,10,10,0.4)'
-  const burgerColor = isDark ? '#FFFFFF' : '#0A0A0A'
+  // Menu ouvert : la page dessous ne défile plus, Échap ferme, le focus entre
+  // dans le menu.
+  useEffect(() => {
+    if (!menuOpen) return
+    const { overflow } = document.body.style
+    document.body.style.overflow = 'hidden'
+    firstLinkRef.current?.focus()
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeMenu(true)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = overflow
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [menuOpen, closeMenu])
 
-  const creationActive = isCreationPath(pathname)
+  const isDark = navTheme === 'dark' && !menuOpen
 
   return (
     <>
       <nav
         ref={navRef}
+        aria-label="Navigation principale"
+        className="site-nav"
+        data-hidden={hidden && !menuOpen}
         style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 50,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0.75rem var(--gutter)',
-          // Les liens lisent ces deux variables. Le thème change donc en CSS,
-          // sans qu'aucun style inline ne vienne figer une couleur périmée.
-          ['--nav-ink' as string]: textColor,
-          ['--nav-ink-dim' as string]: textColorDim,
-          // Aucun fond, aucun filet : la barre n'existe visuellement que par
-          // ses mots. Seule leur couleur bascule selon la section survolée,
-          // via data-nav-theme. Un voile translucide protégerait mieux la
-          // lisibilité quand du texte passe dessous, mais introduirait une
-          // surface là où le parti pris est justement de n'en avoir aucune.
-          background: 'transparent',
+          ['--nav-ink' as string]: isDark ? '#FFFFFF' : '#0A0A0A',
+          ['--nav-ink-dim' as string]: isDark ? 'rgba(255,255,255,0.62)' : 'rgba(10,10,10,0.52)',
         }}
       >
-        <Link
-          href="/"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            textDecoration: 'none',
-            zIndex: 51,
-          }}
-        >
+        <Link href="/" className="site-nav__logo" aria-label={`${siteName}, accueil`}>
           <Image
             src="/logo.png"
-            alt="Cie. Horme"
+            alt=""
             width={44}
             height={44}
             className={isDark ? 'logo-white' : 'logo-dark'}
-            style={{
-              objectFit: 'contain',
-              transition: 'filter 0.3s ease',
-            }}
             priority
           />
         </Link>
 
-        {/* Plus de menu déroulant : « Création » mène directement à la page des
-            créations, où les projets sont présentés en pleine page. Un menu qui
-            s'ouvre pour révéler trois liens ajoute une étape sans rien apporter
-            que la page de destination ne montre déjà mieux. */}
-        <ul className="nav-desktop" style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '2.5rem',
-          listStyle: 'none',
-        }}>
-          {[
-            { href: '/projets', label: navigation.creationButtonLabel, active: creationActive },
-            { href: '/presentation', label: 'Présentation', active: pathname === '/presentation' },
-            { href: '/contact', label: 'Contact', active: pathname === '/contact' },
-          ].map(({ href, label, active }) => (
+        <ul className="nav-desktop">
+          {links.map(({ href, label, active }) => (
             <li key={href}>
-              <Link
-                href={href}
-                className="nav-link"
-                aria-current={active ? 'page' : undefined}
-              >
+              <Link href={href} className="nav-link" aria-current={active ? 'page' : undefined}>
                 {label}
               </Link>
             </li>
@@ -129,135 +128,44 @@ export default function Navbar({ navigation }: { navigation: NavigationCms }) {
         </ul>
 
         <button
+          ref={burgerRef}
+          type="button"
           className="nav-burger"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Menu"
-          style={{
-            display: 'none',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            width: '24px',
-            height: '18px',
-            position: 'relative',
-            zIndex: 51,
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}
+          onClick={() => setMenuOpen(o => !o)}
+          aria-expanded={menuOpen}
+          aria-controls="menu-mobile"
+          aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+          data-open={menuOpen}
+          style={{ ['--burger' as string]: isDark ? '#FFFFFF' : '#0A0A0A' }}
         >
-          <span style={{
-            display: 'block',
-            width: '100%',
-            height: '1.5px',
-            background: burgerColor,
-            transition: 'all 0.3s ease',
-            position: 'absolute',
-            top: menuOpen ? '8px' : '0',
-            transform: menuOpen ? 'rotate(45deg)' : 'none',
-          }} />
-          <span style={{
-            display: 'block',
-            width: '100%',
-            height: '1.5px',
-            background: burgerColor,
-            transition: 'all 0.3s ease',
-            position: 'absolute',
-            top: '8px',
-            opacity: menuOpen ? 0 : 1,
-          }} />
-          <span style={{
-            display: 'block',
-            width: '100%',
-            height: '1.5px',
-            background: burgerColor,
-            transition: 'all 0.3s ease',
-            position: 'absolute',
-            bottom: menuOpen ? '8px' : '0',
-            transform: menuOpen ? 'rotate(-45deg)' : 'none',
-          }} />
+          <span />
+          <span />
         </button>
       </nav>
 
       <div
+        id="menu-mobile"
         className="nav-mobile-overlay"
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 49,
-          background: 'rgba(255,255,255,0.98)',
-          backdropFilter: 'blur(20px)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0',
-          opacity: menuOpen ? 1 : 0,
-          pointerEvents: menuOpen ? 'auto' : 'none',
-          transition: 'opacity 0.35s ease',
-          overflowY: 'auto',
-          padding: '5rem 1.5rem 2rem',
-        }}
+        data-open={menuOpen}
+        // `inert` retire le menu fermé de la tabulation et des lecteurs d'écran.
+        {...(!menuOpen ? { inert: '' as unknown as boolean } : {})}
       >
-        <div style={{ width: '100%', maxWidth: '20rem' }}>
-          <Link
-            href="/"
-            onClick={() => setMenuOpen(false)}
-            style={{
-              display: 'block',
-              fontFamily: 'Ribes, Georgia, serif',
-              fontWeight: 300,
-              fontSize: '1.5rem',
-              color: pathname === '/' ? 'var(--blue)' : 'var(--black)',
-              textDecoration: 'none',
-              letterSpacing: '0.05em',
-              marginBottom: '1.5rem',
-            }}
-          >
-            Index
-          </Link>
-
-          {/* Même logique qu'en desktop : un lien, pas un accordéon. */}
-          <Link
-            href="/projets"
-            onClick={() => setMenuOpen(false)}
-            aria-current={creationActive ? 'page' : undefined}
-            style={{
-              display: 'block',
-              fontFamily: 'Ribes, Georgia, serif',
-              fontWeight: 300,
-              fontSize: '1.5rem',
-              color: creationActive ? 'var(--blue)' : 'var(--black)',
-              letterSpacing: '0.05em',
-              textDecoration: 'none',
-              marginBottom: '1.5rem',
-            }}
-          >
-            {navigation.creationButtonLabel}
-          </Link>
-
-          {[
-            { href: '/presentation', label: 'Présentation' },
-            { href: '/contact', label: 'Contact' },
-          ].map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              onClick={() => setMenuOpen(false)}
-              style={{
-                display: 'block',
-                fontFamily: 'Ribes, Georgia, serif',
-                fontWeight: 300,
-                fontSize: '1.5rem',
-                color: pathname === href ? 'var(--blue)' : 'var(--black)',
-                textDecoration: 'none',
-                letterSpacing: '0.05em',
-                marginBottom: '1.5rem',
-              }}
-            >
-              {label}
-            </Link>
-          ))}
-        </div>
+        <ul>
+          {[{ href: '/', label: navigation.homeLabel, active: pathname === '/' }, ...links].map(
+            ({ href, label, active }, i) => (
+              <li key={href} style={{ ['--i' as string]: i }}>
+                <Link
+                  ref={i === 0 ? firstLinkRef : undefined}
+                  href={href}
+                  onClick={() => closeMenu()}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  {label}
+                </Link>
+              </li>
+            ),
+          )}
+        </ul>
       </div>
     </>
   )

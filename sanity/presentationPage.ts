@@ -1,74 +1,75 @@
-import { defineField, defineType } from 'sanity'
+import { UsersIcon } from '@sanity/icons'
+import { defineArrayMember, defineField, defineType } from 'sanity'
 
-/**
- * PAGE PRÉSENTATION - Où les visiteurs découvrent Joséphine & Louise
- *
- * Structure visuelle (de haut en bas):
- * 1. Surtitre + Titre principal
- * 2. Texte d'introduction (texte riche: possibilité gras, italique, listes)
- * 3. Section "Les danseuses" avec les PORTRAITS (photos seules des danseuses vont ICI, pas en accueil!)
- * 4. Lien vers les créations
- */
 export const presentationPageType = defineType({
   name: 'presentationPage',
-  title: '👥 Page Présentation',
+  title: 'Présentation',
   type: 'document',
-  description:
-    '👋 Bienvenue! Cette page présente Joséphine, Louise et les danseuses. ' +
-    'C\'est ICI qu\'on met les photos SEULES de personnes (pas en accueil!). ' +
-    'La page a 4 sections logiques.',
+  icon: UsersIcon,
+  groups: [
+    { name: 'texte', title: 'Texte', default: true },
+    { name: 'equipe', title: 'Équipe' },
+    { name: 'soutiens', title: 'Soutiens' },
+  ],
   fields: [
-    defineField({
-      name: 'kicker',
-      title: '🏷️ Petit titre (surtitre)',
-      description: 'Texte gris clair au-dessus. Ex: "La compagnie"',
-      type: 'string',
-      initialValue: '',
-    }),
+    defineField({ name: 'kicker', title: 'Surtitre', description: 'Ex. « La compagnie ».', type: 'string', group: 'texte' }),
     defineField({
       name: 'title',
-      title: '✍️ Titre principal',
-      description: 'Le grand titre de la page. Ex: "Cie. Horme"',
+      title: 'Titre de la page',
       type: 'string',
-      initialValue: '',
+      group: 'texte',
       validation: Rule => Rule.required(),
     }),
     defineField({
       name: 'intro',
-      title: '📝 Texte d\'introduction (texte riche)',
-      description:
-        'Paragraphe introductif avec possibilité de formater: gras, italique, listes, liens. ' +
-        'Présentation générale de la compagnie.',
+      title: 'Texte de présentation',
+      description: 'Gras, italique, intertitres, citations et liens possibles.',
       type: 'blockContent',
+      group: 'texte',
     }),
-    defineField({
-      name: 'dancersSectionTitle',
-      title: '🏷️ Titre de la section portraits',
-      description: 'Ex: "Les danseuses", "Portraits", "L\'équipe"',
-      type: 'string',
-      initialValue: '',
-    }),
+    defineField({ name: 'dancersSectionTitle', title: 'Titre de la section équipe', type: 'string', group: 'equipe' }),
     defineField({
       name: 'dancers',
-      title: '👥 Portraits des danseuses',
-      description:
-        '⭐ C\'EST ICI QUE VONT LES PHOTOS SEULES! ' +
-        '\n\n💡 Pour ajouter une danseuse:\n' +
-        '1. Cliquez « Ajouter »\n' +
-        '2. Mettez une photo portrait (carrée, pas coupée)\n' +
-        '3. Remplissez: nom, rôle, biographie, formation\n' +
-        '4. **GLISSEZ** (⋮⋮) pour changer l\'ordre\n' +
-        '5. Cliquez « Publier »\n\n' +
-        '📸 Format photo: 800x800px min, JPG/PNG, bien cadrée sur le visage.',
+      title: 'Membres',
+      description: 'Une fiche par personne. Glissez pour changer l’ordre.',
       type: 'array',
       of: [{ type: 'presentationDancer' }],
+      group: 'equipe',
     }),
     defineField({
-      name: 'projectsCtaLabel',
-      title: '🔗 Texte du lien vers les créations',
-      description: 'Bouton pour aller aux spectacles. Ex: "Voir les projets →"',
+      name: 'partnersTitle',
+      title: 'Titre de la section soutiens',
+      description: 'La section n’apparaît que si la liste ci-dessous contient au moins un soutien.',
       type: 'string',
-      initialValue: '',
+      initialValue: 'Soutiens et partenaires',
+      group: 'soutiens',
     }),
+    defineField({
+      name: 'partners',
+      title: 'Soutiens et partenaires',
+      description: 'Lieux de résidence, coproducteurs, financeurs.',
+      type: 'array',
+      group: 'soutiens',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'partner',
+          fields: [
+            defineField({ name: 'name', title: 'Nom', type: 'string', validation: Rule => Rule.required() }),
+            defineField({ name: 'role', title: 'Nature du soutien', description: 'Ex. « Accueil en résidence ».', type: 'string' }),
+            defineField({ name: 'url', title: 'Site', type: 'url' }),
+            defineField({
+              name: 'logo',
+              title: 'Logo (facultatif)',
+              description: 'PNG ou SVG sur fond transparent. Affiché en gris, en couleur au survol.',
+              type: 'image',
+            }),
+          ],
+          preview: { select: { title: 'name', subtitle: 'role', media: 'logo' } },
+        }),
+      ],
+    }),
+    defineField({ name: 'projectsCtaLabel', title: 'Lien vers les créations', type: 'string', group: 'texte' }),
   ],
+  preview: { prepare: () => ({ title: 'Présentation' }) },
 })

@@ -37,6 +37,9 @@ studio/.env
 studio/dist/
 studio/.sanity/
 
+# sauvegardes du contenu (npm run content:backup) : archives lourdes, jamais dans git
+backups/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

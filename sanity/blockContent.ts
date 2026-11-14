@@ -9,10 +9,14 @@ export const blockContentType = defineType({
       type: 'block',
       styles: [
         { title: 'Normal', value: 'normal' },
-        { title: 'Titre', value: 'h2' },
+        { title: 'Intertitre', value: 'h2' },
+        { title: 'Petit intertitre', value: 'h3' },
         { title: 'Citation', value: 'blockquote' },
       ],
-      lists: [{ title: 'Puce', value: 'bullet' }],
+      lists: [
+        { title: 'Liste à puces', value: 'bullet' },
+        { title: 'Liste numérotée', value: 'number' },
+      ],
       marks: {
         decorators: [
           { title: 'Gras', value: 'strong' },
@@ -24,7 +28,12 @@ export const blockContentType = defineType({
             type: 'object',
             title: 'Lien',
             fields: [
-              { name: 'href', type: 'url', title: 'URL' },
+              {
+                name: 'href',
+                type: 'url',
+                title: 'Adresse',
+                validation: (Rule: any) => Rule.uri({ scheme: ['http', 'https', 'mailto', 'tel'] }),
+              },
               {
                 name: 'blank',
                 type: 'boolean',

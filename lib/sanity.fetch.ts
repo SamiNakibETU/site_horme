@@ -34,6 +34,23 @@ const STEGA_EXCLUDED = new Set([
   'color',
   'accent',
   'alt',
+  // Valeurs comparées à une liste ou injectées dans le CSS : un caractère
+  // invisible les rendrait méconnaissables, et l'essai d'une police dans
+  // l'Aperçu ne marcherait pas.
+  'fontDisplay',
+  'fontText',
+  'accentColor',
+  'accentCustom',
+  'objectFit',
+  'objectPosition',
+  'siteName',
+  'date',
+  'time',
+  'videoUrl',
+  'ticketUrl',
+  'featuredSlugs',
+  'lqip',
+  'ref',
 ])
 
 function previewClient(): SanityClient | null {

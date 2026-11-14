@@ -2,9 +2,8 @@ import { defineField, defineType } from 'sanity'
 
 export const presentationDancerType = defineType({
   name: 'presentationDancer',
-  title: 'Danseuse',
+  title: 'Membre',
   type: 'object',
-  description: 'Portrait et biographie d’une danseuse de la compagnie.',
   fields: [
     defineField({
       name: 'name',
@@ -23,8 +22,8 @@ export const presentationDancerType = defineType({
       name: 'portrait',
       title: 'Portrait',
       description:
-        'Photo carrée, 800 × 800 px minimum. Placez le point du « hotspot » ' +
-        'sur le visage pour qu’il reste centré à tous les formats.',
+        'Format portrait, 1200 px de haut minimum. Pour garder le visage visible, cliquez sur ' +
+        'le crayon de la photo et placez le cercle sur le visage.',
       type: 'image',
       options: { hotspot: true },
       validation: Rule => Rule.required().error('Un portrait est nécessaire.'),
@@ -61,7 +60,7 @@ export const presentationDancerType = defineType({
     select: { title: 'name', subtitle: 'role', media: 'portrait' },
     prepare({ title, subtitle, media }) {
       return {
-        title: title || 'Danseuse sans nom',
+        title: title || 'Sans nom',
         subtitle: subtitle || 'Rôle non renseigné',
         media,
       }

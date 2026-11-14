@@ -1,34 +1,46 @@
+import { MenuIcon } from '@sanity/icons'
 import { defineField, defineType } from 'sanity'
 
 export const navigationType = defineType({
   name: 'navigation',
-  title: '🔗 Menu de navigation',
+  title: 'Menu',
   type: 'document',
+  icon: MenuIcon,
   description:
-    'Le menu en haut à droite du site. Il compte trois entrées : Création, ' +
-    'Présentation et Contact. Seul le libellé de la première est modifiable ' +
-    'ici — les deux autres portent le nom de leur page.',
+    'Les mots du menu en haut à droite du site. Les pages vers lesquelles ils mènent ne changent pas.',
   fields: [
     defineField({
       name: 'creationButtonLabel',
-      title: 'Libellé de l’entrée « Création »',
-      description:
-        'Le mot affiché dans le menu pour accéder aux créations. ' +
-        'Il mène à la page qui les présente toutes.',
+      title: 'Entrée vers les créations',
       type: 'string',
-      initialValue: 'Création',
+      initialValue: 'Créations',
       validation: Rule => Rule.required().error('Le menu a besoin d’un libellé.'),
     }),
-    // Les champs « Groupe 1 », « Sous-menus » et « Autres liens » ont été
-    // retirés : ils alimentaient un menu déroulant qui n'existe plus. Les
-    // conserver aurait été pire que de les supprimer — quelqu'un les aurait
-    // remplis, n'aurait vu aucun effet sur le site, et en aurait conclu que
-    // le CMS était cassé. Les créations se gèrent désormais dans « Créations ».
+    defineField({
+      name: 'presentationLabel',
+      title: 'Entrée vers la présentation',
+      type: 'string',
+      initialValue: 'Présentation',
+    }),
+    defineField({
+      name: 'contactLabel',
+      title: 'Entrée vers le contact',
+      type: 'string',
+      initialValue: 'Contact',
+    }),
+    defineField({
+      name: 'homeLabel',
+      title: 'Entrée vers l’accueil (menu du téléphone)',
+      description: 'Sur ordinateur, le logo mène déjà à l’accueil.',
+      type: 'string',
+      initialValue: 'Accueil',
+    }),
   ],
   preview: {
-    select: { title: 'creationButtonLabel' },
-    prepare({ title }) {
-      return { title: 'Menu de navigation', subtitle: title || 'Création' }
-    },
+    select: { a: 'creationButtonLabel', b: 'presentationLabel', c: 'contactLabel' },
+    prepare: ({ a, b, c }) => ({
+      title: 'Menu',
+      subtitle: [a || 'Créations', b || 'Présentation', c || 'Contact'].join(', '),
+    }),
   },
 })

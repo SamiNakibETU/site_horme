@@ -1,86 +1,66 @@
+import {
+  CogIcon,
+  DocumentTextIcon,
+  EnvelopeIcon,
+  HelpCircleIcon,
+  HomeIcon,
+  MenuIcon,
+  ProjectsIcon,
+  StarIcon,
+  UsersIcon,
+  BlockElementIcon,
+} from '@sanity/icons'
+import type { ComponentType } from 'react'
 import type { StructureResolver } from 'sanity/structure'
-import { SANITY_SINGLETON_IDS } from './singletonIds'
+import { Guide } from './Guide'
+import { SANITY_SINGLETON_IDS as IDS } from './singletonIds'
 
-const singletonListItem = (
-  S: Parameters<StructureResolver>[0],
-  typeName: string,
-  title: string,
-  id: string,
-) =>
+type S = Parameters<StructureResolver>[0]
+
+const single = (S: S, type: string, title: string, id: string, icon: ComponentType) =>
   S.listItem()
     .title(title)
     .id(id)
-    .child(S.document().schemaType(typeName).documentId(id))
+    .icon(icon)
+    .child(S.document().schemaType(type).documentId(id).title(title))
 
+/**
+ * Menu du Studio, dans l'ordre où l'on s'en sert : les créations d'abord
+ * (ce qu'on modifie le plus souvent), puis les pages, puis les réglages.
+ */
 export const structure: StructureResolver = S =>
   S.list()
-    .title('📍 Contenu du site Horme')
+    .title('Site de la compagnie')
     .items([
-      // ===== PAGES PRINCIPALES =====
       S.listItem()
-        .title('📄 PAGES PRINCIPALES')
-        .id('pages-groupe')
-        .child(
-          S.list()
-            .title('Pages du site')
-            .items([
-              singletonListItem(
-                S,
-                'homePage',
-                '🏠 Accueil',
-                SANITY_SINGLETON_IDS.homePage,
-              ),
-              singletonListItem(
-                S,
-                'presentationPage',
-                '👥 Présentation',
-                SANITY_SINGLETON_IDS.presentationPage,
-              ),
-              singletonListItem(
-                S,
-                'contactPage',
-                '✉️ Contact',
-                SANITY_SINGLETON_IDS.contactPage,
-              ),
-            ]),
-        ),
-
-      S.divider(),
-
-      // ===== CRÉATIONS =====
-      S.listItem()
-        .title('🎭 CRÉATIONS (Spectacles & Projets)')
+        .title('Créations')
         .id('creations')
-        .child(S.documentTypeList('project').title('🎭 Créations')),
+        .icon(ProjectsIcon)
+        .child(
+          S.documentTypeList('project')
+            .title('Créations')
+            .defaultOrdering([{ field: 'year', direction: 'desc' }]),
+        ),
+      single(S, 'projectsPage', 'Créations à la une', IDS.projectsPage, StarIcon),
 
       S.divider(),
 
-      // ===== CONFIGURATION =====
+      single(S, 'homePage', 'Accueil', IDS.homePage, HomeIcon),
+      single(S, 'presentationPage', 'Présentation', IDS.presentationPage, UsersIcon),
+      single(S, 'contactPage', 'Contact', IDS.contactPage, EnvelopeIcon),
+      single(S, 'legalPage', 'Mentions légales', IDS.legalPage, DocumentTextIcon),
+
+      S.divider(),
+
+      single(S, 'siteSettings', 'Réglages : polices, couleur, Google', IDS.siteSettings, CogIcon),
+      single(S, 'navigation', 'Menu', IDS.navigation, MenuIcon),
+      single(S, 'footerContent', 'Pied de page', IDS.footerContent, BlockElementIcon),
+
+      S.divider(),
+
       S.listItem()
-        .title('⚙️ CONFIGURATION DU SITE')
-        .id('config-groupe')
-        .child(
-          S.list()
-            .title('Configuration')
-            .items([
-              singletonListItem(
-                S,
-                'navigation',
-                '🔗 Menu de navigation (haut du site)',
-                SANITY_SINGLETON_IDS.navigation,
-              ),
-              singletonListItem(
-                S,
-                'footerContent',
-                '👣 Pied de page',
-                SANITY_SINGLETON_IDS.footerContent,
-              ),
-              singletonListItem(
-                S,
-                'siteSettings',
-                '🔍 Référencement & SEO',
-                SANITY_SINGLETON_IDS.siteSettings,
-              ),
-            ]),
-        ),
+        .title('Mode d’emploi')
+        .id('guide')
+        .icon(HelpCircleIcon)
+        .child(S.component(Guide).id('guide-view').title('Mode d’emploi')),
     ])

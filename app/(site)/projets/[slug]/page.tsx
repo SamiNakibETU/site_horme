@@ -1,8 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getAllProjects, getProjectBySlug } from '@/lib/getProjects'
-import RevealImage from '@/components/RevealImage'
+import AgendaList from '@/components/AgendaList'
+import Photo from '@/components/Photo'
+import { PortableTextCms } from '@/components/PortableTextCms'
+import VideoEmbed from '@/components/VideoEmbed'
+import { getSiteSettings } from '@/lib/getCms'
+import { getAllProjects, getOrderedProjects, getProjectBySlug } from '@/lib/getProjects'
+import { SITE_URL, jsonLd, portableTextToPlain, truncate } from '@/lib/seo'
 
 export const revalidate = 3600
 
@@ -11,186 +16,194 @@ export async function generateStaticParams() {
   return projects.map(p => ({ slug: p.slug }))
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string }
-}): Promise<Metadata> {
-  const project = await getProjectBySlug(params.slug)
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const [project, s] = await Promise.all([getProjectBySlug(params.slug), getSiteSettings()])
   if (!project) return {}
-
-  const title = `${project.title} | Cie. Horme`
-  const description = project.description?.trim() || undefined
-
+  const description = truncate(project.description || portableTextToPlain(project.body) || `${project.title}, ${project.type.toLowerCase()} de la ${s.siteName}, ${project.year}.`)
   return {
-    title,
+    title: project.title,
     description,
+    alternates: { canonical: `/projets/${project.slug}` },
     openGraph: {
-      title,
+      title: `${project.title} | ${s.siteName}`,
       description,
-      // C'est ce qui détermine l'aperçu affiché quand ce lien est partagé
-      // sur Instagram, WhatsApp ou dans un e-mail : sans elle, la carte de
-      // partage retombait sur l'image générique du site entier.
-      ...(project.coverImage ? { images: [{ url: project.coverImage }] } : {}),
+      type: 'article',
+      ...(project.cover ? { images: [{ url: project.cover.url, width: project.cover.width, height: project.cover.height }] } : {}),
     },
   }
 }
 
+function todayInParis() {
+  return new Intl.DateTimeFormat('fr-CA', { timeZone: 'Europe/Paris' }).format(new Date())
+}
+
 export default async function ProjectPage({ params }: { params: { slug: string } }) {
-  const project = await getProjectBySlug(params.slug)
+  const [project, { featured, others }, s] = await Promise.all([
+    getProjectBySlug(params.slug),
+    getOrderedProjects(),
+    getSiteSettings(),
+  ])
   if (!project) notFound()
 
-  return (
-    <div
-      data-nav-theme="light"
-      className="project-detail"
-      style={{
-        display: 'flex',
-        height: '100dvh',
-        // La page démarre sous la barre de navigation. Sans ça, la colonne de
-        // photos défile derrière elle : le texte du menu, en thème clair pour
-        // la colonne blanche de gauche, devient illisible sur les images à
-        // droite. Le thème ne se choisit que verticalement, il ne peut pas
-        // être juste des deux côtés d'une mise en page scindée à la verticale.
-        paddingTop: 'var(--nav-height)',
-        overflow: 'hidden',
-        background: `
-          radial-gradient(ellipse 50% 40% at 20% 60%, rgba(28,76,244,0.07) 0%, transparent 55%),
-          radial-gradient(ellipse 40% 35% at 75% 40%, rgba(28,76,244,0.05) 0%, transparent 50%),
-          var(--white)
-        `,
-      }}
-    >
+  // Création suivante, dans l'ordre du site : à la une, puis les autres.
+  const order = [...featured, ...others]
+  const pos = order.findIndex(p => p.slug === project.slug)
+  const next = order.length > 1 ? order[(pos + 1) % order.length] : null
 
-      <aside className="project-sidebar" style={{
-        flexShrink: 0,
-        width: 'clamp(220px, 28vw, 380px)',
-        padding: 'var(--gutter)',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        overflowY: 'auto',
-      }}>
+  const today = todayInParis()
+  const hasMedia = project.images.length > 0 || project.videoUrl || project.videoFile
+
+  // Données structurées : l'œuvre, et une représentation (Event) par date.
+  // Google peut alors afficher les dates directement dans ses résultats.
+  const ld = {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: project.title,
+    url: `${SITE_URL}/projets/${project.slug}`,
+    dateCreated: String(project.year),
+    genre: project.type,
+    creator: { '@type': 'DanceGroup', name: s.siteName, url: SITE_URL },
+    ...(project.description ? { abstract: project.description } : {}),
+    ...(project.cover ? { image: project.cover.url } : {}),
+    ...(project.performances.length
+      ? {
+          subjectOf: project.performances.map(p => ({
+            '@type': 'DanceEvent',
+            name: project.title,
+            startDate: p.date,
+            eventStatus: 'https://schema.org/EventScheduled',
+            location: { '@type': 'Place', name: p.venue, address: p.city || 'France' },
+            performer: { '@type': 'DanceGroup', name: s.siteName },
+            ...(p.ticketUrl ? { offers: { '@type': 'Offer', url: p.ticketUrl } } : {}),
+          })),
+        }
+      : {}),
+  }
+
+  return (
+    <div data-nav-theme="light" className="project-detail">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(ld) }} />
+
+      <aside className="project-sidebar">
         <div>
-          <Link href="/projets" className="ed-link" style={{ marginBottom: '2.5rem' }}>
-            ← Créations
+          <Link href="/projets" className="ed-link project-back">
+            Toutes les créations
           </Link>
 
-          <h1 className="ed-display" style={{ fontSize: 'var(--step-2)', marginBottom: '0.5rem' }}>
-            {project.title}
-          </h1>
+          <h1 className="ed-display project-title">{project.title}</h1>
+          {project.subtitle && <p className="project-subtitle">{project.subtitle}</p>}
 
-          {project.subtitle && (
-            <p style={{
-              fontFamily: 'Ribes, Georgia, serif',
-              fontWeight: 300,
-              fontSize: '0.95rem',
-              color: 'var(--ink-soft)',
-              marginBottom: '1.75rem',
-            }}>
-              {project.subtitle}
-            </p>
-          )}
-
-          {/* Fiche technique, posée sous un filet. Les gris sont remontés à
-              --ink-soft : l'ancien rgba(10,10,10,0.3) passait sous le seuil de
-              contraste 3:1 et devenait illisible en plein jour. */}
-          <dl style={{
-            borderTop: '1px solid var(--rule)',
-            paddingTop: '1rem',
-            marginBottom: '2rem',
-            display: 'grid',
-            gap: '0.35rem',
-          }}>
-            <div className="ed-caption" style={{ marginTop: 0 }}>
-              {project.type} · {project.year}
+          <dl className="project-facts">
+            <div>
+              <dt>Type</dt>
+              <dd>{project.type}</dd>
+            </div>
+            <div>
+              <dt>Année</dt>
+              <dd>{project.year}</dd>
             </div>
             {project.location && (
-              <div className="ed-caption" style={{ marginTop: 0 }}>{project.location}</div>
+              <div>
+                <dt>Lieu</dt>
+                <dd>{project.location}</dd>
+              </div>
             )}
             {project.photographer.length > 0 && (
-              <div className="ed-caption" style={{ marginTop: 0 }}>
-                Photos · {project.photographer.join(', ')}
+              <div>
+                <dt>Photos</dt>
+                <dd>{project.photographer.join(', ')}</dd>
               </div>
             )}
           </dl>
 
-          {project.description && (
-            <p className="ed-body" style={{ fontSize: '0.9rem' }}>
-              {project.description}
-            </p>
+          {project.description && <p className="ed-body project-summary">{project.description}</p>}
+
+          {project.body.length > 0 && (
+            <div className="project-body">
+              <PortableTextCms value={project.body} size="small" />
+            </div>
+          )}
+
+          {project.performances.length > 0 && (
+            <section className="project-block" aria-labelledby="p-dates">
+              <h2 id="p-dates" className="ed-caption">Dates</h2>
+              <AgendaList entries={project.performances} today={today} />
+            </section>
+          )}
+
+          {project.credits.length > 0 && (
+            <section className="project-block" aria-labelledby="p-credits">
+              <h2 id="p-credits" className="ed-caption">Distribution</h2>
+              <dl className="project-credits">
+                {project.credits.map((c, i) => (
+                  <div key={i}>
+                    <dt>{c.role}</dt>
+                    <dd>{c.names}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          )}
+
+          {(project.links.length > 0 || project.dossierUrl) && (
+            <section className="project-block" aria-labelledby="p-liens">
+              <h2 id="p-liens" className="ed-caption">À lire</h2>
+              <ul className="project-links">
+                {project.dossierUrl && (
+                  <li>
+                    <a href={`${project.dossierUrl}?dl=`} className="ed-link">
+                      Télécharger le dossier (PDF)
+                    </a>
+                  </li>
+                )}
+                {project.links.map((l, i) => (
+                  <li key={i}>
+                    <a href={l.url} className="ed-link" target="_blank" rel="noopener noreferrer">
+                      {l.label}
+                      <span className="sr-only"> (nouvel onglet)</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
         </div>
 
-        <p className="ed-caption" style={{ marginTop: '2rem' }}>
-          {project.images.length > 0
-            ? `${project.images.length} image${project.images.length > 1 ? 's' : ''}`
-            : 'Sans visuel'}
-        </p>
+        {next && (
+          <Link href={`/projets/${next.slug}`} className="project-next">
+            <span className="ed-caption" style={{ marginTop: 0 }}>Création suivante</span>
+            <span className="project-next__title">{next.title}</span>
+          </Link>
+        )}
       </aside>
 
-      <main className="project-images" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-        {/* Une création peut ne pas encore avoir de photographies. On le dit,
-            plutôt que de laisser une colonne vide qui ressemble à une panne. */}
-        {project.images.length === 0 && !project.video && (
-          <div
-            style={{
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: 'var(--gutter)',
-            }}
-          >
+      <main className="project-images">
+        {!hasMedia && (
+          <div className="project-empty">
             <p className="ed-caption" style={{ marginTop: 0, textAlign: 'center' }}>
-              Les photographies de cette création<br />seront publiées prochainement
+              Les photographies de cette création
+              <br />
+              seront publiées prochainement
             </p>
           </div>
         )}
 
-        {project.video && (
-          <div style={{ width: '100%', aspectRatio: '16/9' }}>
-            <video
-              src={project.video}
-              controls
-              playsInline
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-            />
-          </div>
+        {project.videoUrl && <VideoEmbed url={project.videoUrl} poster={project.cover} title={project.title} />}
+        {!project.videoUrl && project.videoFile && (
+          <video src={project.videoFile} controls playsInline preload="metadata" className="project-video" />
         )}
 
-        {project.images.map((img, i) => {
-          const meta = project.galleryItems?.[i]
-          const alt = meta?.alt?.trim() || `${project.title} — image ${i + 1}`
-          return (
-            <div key={`${img}-${i}`} style={{ width: '100%', position: 'relative' }}>
-              <RevealImage
-                src={img}
-                alt={alt}
-                width={1200}
-                height={900}
-                // Seule la première photo est prioritaire : les suivantes ne
-                // sont pas encore visibles à l'arrivée sur la page, inutile
-                // de les faire concurrencer la première pour la bande passante.
-                priority={i === 0}
-                style={{ width: '100%', height: 'auto', display: 'block', margin: 0, padding: 0 }}
-              />
-              {meta?.credit && (
-                <p style={{
-                  fontFamily: 'Ribes, serif',
-                  fontSize: '0.55rem',
-                  letterSpacing: '0.12em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(10,10,10,0.35)',
-                  padding: '0.5rem var(--gutter) 1.25rem',
-                  margin: 0,
-                }}>
-                  Photo · {meta.credit}
-                </p>
-              )}
-            </div>
-          )
-        })}
+        {project.images.map((img, i) => (
+          <figure key={`${img.url}-${i}`} className="project-figure">
+            <Photo
+              image={img}
+              alt={img.alt || `${project.title}, photo ${i + 1}`}
+              priority={i === 0}
+              sizes="(max-width: 768px) 100vw, 72vw"
+            />
+            {img.credit && <figcaption>Photo : {img.credit}</figcaption>}
+          </figure>
+        ))}
       </main>
     </div>
   )

@@ -1,12 +1,17 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
-import { getContactPage } from '@/lib/getCms'
+import { getContactPage, getSiteSettings } from '@/lib/getCms'
 
 export const revalidate = 3600
 
-export async function generateMetadata() {
-  const c = await getContactPage()
+export async function generateMetadata(): Promise<Metadata> {
+  const [c, s] = await Promise.all([getContactPage(), getSiteSettings()])
+  const description = `Écrire à la ${s.siteName} : ${c.email}. ${c.locationText.split('\n')[0]}.`
   return {
-    title: `${c.title} | Contact | Cie. Horme`,
+    title: 'Contact',
+    description,
+    alternates: { canonical: '/contact' },
+    openGraph: { title: `Contact | ${s.siteName}`, description },
   }
 }
 
@@ -14,55 +19,58 @@ export default async function ContactPage() {
   const c = await getContactPage()
 
   return (
-    <main
-      data-nav-theme="light"
-      style={{
-        minHeight: '100vh',
-        paddingTop: '7rem',
-        background: `
-          radial-gradient(ellipse 50% 35% at 25% 55%, rgba(28,76,244,0.08) 0%, transparent 60%),
-          radial-gradient(ellipse 40% 40% at 75% 40%, rgba(28,76,244,0.05) 0%, transparent 55%),
-          var(--white)
-        `,
-      }}
-    >
-      <div style={{ padding: '0 var(--gutter)', maxWidth: '52rem', margin: '0 auto' }}>
-
-        <p className="ed-caption" style={{ marginTop: 0, marginBottom: '1.5rem' }}>
-          {c.kicker}
-        </p>
-
-        <h1 className="ed-display" style={{ fontSize: 'var(--step-3)', marginBottom: 'clamp(3rem, 7vw, 5rem)' }}>
+    <main data-nav-theme="light" className="page page--tinted">
+      <div className="page__inner page__inner--narrow">
+        <p className="ed-caption page__kicker">{c.kicker}</p>
+        <h1 className="ed-display page__title" style={{ fontSize: 'var(--step-3)' }}>
           {c.title}
         </h1>
 
-        {/* Chaque information est posée sous un filet plutôt que séparée par du
-            vide : la ligne donne une structure de fiche, et permet de resserrer
-            les blocs sans qu'ils se confondent. */}
-        <div style={{ borderTop: '1px solid var(--rule)', paddingTop: '1.25rem', marginBottom: '2.5rem' }}>
-          <p className="ed-caption" style={{ marginTop: 0, marginBottom: '0.75rem' }}>
-            {c.emailLabel}
-          </p>
+        {/* Chaque information sous un filet : une fiche, pas une page vide. */}
+        <div className="contact-block">
+          <p className="ed-caption">{c.emailLabel}</p>
           <a href={`mailto:${c.email}`} className="ed-mail">
             {c.email}
           </a>
         </div>
 
-        <div style={{ borderTop: '1px solid var(--rule)', paddingTop: '1.25rem', marginBottom: '3.5rem' }}>
-          <p className="ed-caption" style={{ marginTop: 0, marginBottom: '0.75rem' }}>
-            {c.locationLabel}
-          </p>
+        {c.contacts.length > 0 && (
+          <div className="contact-block">
+            <dl className="contact-people">
+              {c.contacts.map((p, i) => (
+                <div key={i}>
+                  <dt className="ed-caption">{p.role}</dt>
+                  <dd>
+                    {p.name && <span className="contact-people__name">{p.name}</span>}
+                    {p.email && <a href={`mailto:${p.email}`}>{p.email}</a>}
+                    {p.phone && <a href={`tel:${p.phone.replace(/[^\d+]/g, '')}`}>{p.phone}</a>}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )}
+
+        <div className="contact-block">
+          <p className="ed-caption">{c.locationLabel}</p>
           <p className="ed-body" style={{ whiteSpace: 'pre-line' }}>
             {c.locationText}
           </p>
         </div>
 
-        <div style={{ paddingBottom: '5rem' }}>
+        {c.pressKitUrl && (
+          <div className="contact-block">
+            <a href={`${c.pressKitUrl}?dl=`} className="ed-link">
+              {c.pressKitLabel} (PDF)
+            </a>
+          </div>
+        )}
+
+        <div className="page__foot">
           <Link href="/" className="ed-link">
             {c.backLinkLabel}
           </Link>
         </div>
-
       </div>
     </main>
   )

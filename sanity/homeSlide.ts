@@ -12,8 +12,8 @@ export const homeSlideType = defineType({
       name: 'image',
       title: 'Photo',
       description:
-        'Format paysage, 1920 px de large minimum. Glissez le point du ' +
-        '« hotspot » sur le sujet pour qu’il reste visible à tous les écrans.',
+        'Format paysage, 1920 px de large minimum. Pour choisir ce qui reste visible quand ' +
+        'la photo est rognée, cliquez sur le crayon de la photo et déplacez le cercle sur le sujet.',
       type: 'image',
       options: { hotspot: true },
       validation: Rule => Rule.required().error('Une photo est nécessaire.'),
@@ -55,6 +55,9 @@ export const homeSlideType = defineType({
         '« center top » montre le haut, « center bottom » le bas.',
       type: 'string',
       initialValue: 'center',
+      // Remplacé par le hotspot de la photo, désormais pris en compte. Gardé
+      // masqué pour ne pas perdre les réglages déjà saisis.
+      hidden: true,
     }),
   ],
   preview: {
