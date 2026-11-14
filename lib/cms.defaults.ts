@@ -21,7 +21,6 @@ export const defaultSiteSettings: SiteSettingsCms = {
   fontDisplay: "'Ribes', Georgia, serif",
   fontText: "'Ribes', Georgia, serif",
   customFontUrl: '',
-  customFontBoldUrl: '',
   accent: '#1C4CF4',
 }
 

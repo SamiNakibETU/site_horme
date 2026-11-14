@@ -36,13 +36,9 @@ export async function generateMetadata(): Promise<Metadata> {
 const safeFontUrl = (u: string) => (/^https:\/\/cdn\.sanity\.io\/[\w\-./]+$/.test(u) ? u : '')
 
 function themeCss(s: Awaited<ReturnType<typeof getSiteSettings>>): string {
-  const regular = safeFontUrl(s.customFontUrl)
-  const bold = safeFontUrl(s.customFontBoldUrl)
-  const face = (url: string, weight: string) =>
-    url ? `@font-face{font-family:'HorrmeCustom';src:url('${url}');font-weight:${weight};font-display:swap}` : ''
+  const url = safeFontUrl(s.customFontUrl)
   return [
-    face(regular, bold ? '100 499' : '100 900'),
-    face(bold, '500 900'),
+    url ? `@font-face{font-family:'HorrmeCustom';src:url('${url}');font-weight:100 900;font-display:swap}` : '',
     // Les valeurs viennent d'une liste fermée (polices) ou sont validées par
     // expression régulière (couleur) : rien de libre n'atteint le CSS.
     `:root{--font-display:${s.fontDisplay};--font-text:${s.fontText};--blue:${s.accent}}`,

@@ -35,7 +35,6 @@ export type SiteSettingsCms = {
   fontDisplay: string
   fontText: string
   customFontUrl: string
-  customFontBoldUrl: string
   accent: string
 }
 

@@ -69,17 +69,6 @@ export const siteSettingsType = defineType({
       options: { accept: '.woff2,.woff,.otf,.ttf' },
     }),
     defineField({
-      name: 'customFontBold',
-      title: 'Ma propre police : version plus épaisse',
-      description:
-        'Facultatif. Utilisée pour le menu et les petites capitales. Sans elle, le ' +
-        'navigateur épaissit la police lui-même.',
-      type: 'file',
-      group: 'typo',
-      options: { accept: '.woff2,.woff,.otf,.ttf' },
-      hidden: ({ document }) => !document?.customFont,
-    }),
-    defineField({
       name: 'accentColor',
       title: 'Couleur d’accent',
       description: 'La couleur des liens, du mot mis en avant sur l’accueil et des éléments actifs.',

@@ -49,8 +49,7 @@ const qSettings = `*[_id == $id][0]{
   siteName, metaTitle, metaDescription, ogTitle, ogDescription,
   "ogImage": ogImage${IMAGE},
   fontDisplay, fontText, accentColor, accentCustom,
-  "customFontUrl": customFont.asset->url,
-  "customFontBoldUrl": customFontBold.asset->url
+  "customFontUrl": customFont.asset->url
 }`
 
 /**
@@ -75,7 +74,6 @@ export const getSiteSettings = cache(async (): Promise<SiteSettingsCms> => {
     fontDisplay: fontStack(row.fontDisplay, Boolean(customFontUrl)),
     fontText: fontStack(row.fontText, Boolean(customFontUrl)),
     customFontUrl,
-    customFontBoldUrl: str(row.customFontBoldUrl, ''),
     accent,
   }
 })

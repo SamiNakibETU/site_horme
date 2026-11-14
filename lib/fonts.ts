@@ -54,24 +54,18 @@ export type FontKey =
   | 'cormorant'
   | 'instrument-serif'
 
-type FontEntry = { title: string; stack: string; kind: 'sans' | 'serif' }
-
 /** Valeur CSS de chaque police, repli compris. */
-export const FONTS: Record<FontKey, FontEntry> = {
-  ribes: { title: 'Ribes (police actuelle)', stack: "'Ribes', Georgia, serif", kind: 'sans' },
-  hanken: { title: 'Hanken Grotesk', stack: 'var(--ff-hanken), system-ui, sans-serif', kind: 'sans' },
-  'inter-tight': { title: 'Inter Tight', stack: 'var(--ff-inter-tight), system-ui, sans-serif', kind: 'sans' },
-  bricolage: { title: 'Bricolage Grotesque', stack: 'var(--ff-bricolage), system-ui, sans-serif', kind: 'sans' },
-  'space-grotesk': { title: 'Space Grotesk', stack: 'var(--ff-space-grotesk), system-ui, sans-serif', kind: 'sans' },
-  fraunces: { title: 'Fraunces', stack: 'var(--ff-fraunces), Georgia, serif', kind: 'serif' },
-  newsreader: { title: 'Newsreader', stack: 'var(--ff-newsreader), Georgia, serif', kind: 'serif' },
-  'eb-garamond': { title: 'EB Garamond', stack: 'var(--ff-eb-garamond), Georgia, serif', kind: 'serif' },
-  cormorant: { title: 'Cormorant Garamond', stack: 'var(--ff-cormorant), Georgia, serif', kind: 'serif' },
-  'instrument-serif': {
-    title: 'Instrument Serif (titres seulement)',
-    stack: 'var(--ff-instrument-serif), Georgia, serif',
-    kind: 'serif',
-  },
+export const FONTS: Record<FontKey, string> = {
+  ribes: "'Ribes', Georgia, serif",
+  hanken: 'var(--ff-hanken), system-ui, sans-serif',
+  'inter-tight': 'var(--ff-inter-tight), system-ui, sans-serif',
+  bricolage: 'var(--ff-bricolage), system-ui, sans-serif',
+  'space-grotesk': 'var(--ff-space-grotesk), system-ui, sans-serif',
+  fraunces: 'var(--ff-fraunces), Georgia, serif',
+  newsreader: 'var(--ff-newsreader), Georgia, serif',
+  'eb-garamond': 'var(--ff-eb-garamond), Georgia, serif',
+  cormorant: 'var(--ff-cormorant), Georgia, serif',
+  'instrument-serif': 'var(--ff-instrument-serif), Georgia, serif',
 }
 
 export function isFontKey(v: unknown): v is FontKey {
@@ -84,8 +78,8 @@ export function isFontKey(v: unknown): v is FontKey {
  * fichier n'est fourni, le navigateur passe simplement à Ribes.
  */
 export function fontStack(choice: unknown, hasCustom: boolean): string {
-  if (choice === 'custom') return hasCustom ? `'HorrmeCustom', ${FONTS.ribes.stack}` : FONTS.ribes.stack
-  return isFontKey(choice) ? FONTS[choice].stack : FONTS.ribes.stack
+  if (choice === 'custom') return hasCustom ? `'HorrmeCustom', ${FONTS.ribes}` : FONTS.ribes
+  return isFontKey(choice) ? FONTS[choice] : FONTS.ribes
 }
 
 /** Classes à poser sur <html> : elles déclarent les variables --ff-*. */
