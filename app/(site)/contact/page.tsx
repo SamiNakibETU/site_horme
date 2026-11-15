@@ -67,7 +67,7 @@ export default async function ContactPage() {
         )}
 
         <div className="page__foot">
-          <Link href="/" className="ed-link">
+          <Link href="/" className="text-link">
             {c.backLinkLabel}
           </Link>
         </div>

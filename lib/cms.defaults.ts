@@ -80,18 +80,18 @@ export const defaultHomePage: HomePageCms = {
   ],
   manifestoLine1: 'Le corps comme',
   manifestoAccent: 'langage premier.',
-  manifestoCtaLabel: 'Voir les créations →',
+  manifestoCtaLabel: 'Voir les créations',
   introKicker: 'La compagnie',
   introParagraph1:
     "Louise Melli et Joséphine Hassid-Langlois portent une compagnie ancrée dans l'écriture chorégraphique contemporaine. La danse comme langage premier, leur pratique traverse les territoires du corps en mouvement, explore les frontières entre écriture et improvisation, mémoire et instant présent.",
   introParagraph2: 'Chaque projet est une recherche sensible, un dialogue entre espace et temps.',
-  introCtaLabel: 'Découvrir la compagnie →',
+  introCtaLabel: 'Découvrir la compagnie',
   imagesSectionKicker: 'La compagnie en images',
   imagesSectionBody: 'Portraits et regards : retrouvez la compagnie sur la page Présentation.',
-  imagesSectionCtaLabel: 'Présentation →',
+  imagesSectionCtaLabel: 'Présentation',
   agendaTitle: 'Prochaines dates',
   creationsKicker: 'Créations',
-  creationsFooterCtaLabel: 'Toutes les créations →',
+  creationsFooterCtaLabel: 'Toutes les créations',
 }
 
 export const defaultPresentationIntroFallback = {

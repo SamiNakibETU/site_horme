@@ -28,8 +28,15 @@ import { SANITY_SINGLETON_IDS as IDS } from '@/lib/sanity.ids'
 
 type Row = Record<string, unknown> | null
 
-/** Texte saisi, ou valeur par défaut si le champ est vide. */
-const str = (v: unknown, d: string) => (typeof v === 'string' && v.trim() ? v : d)
+/**
+ * Texte saisi, ou valeur par défaut si le champ est vide. Les flèches
+ * (→ ← ↗) sont retirées : les boutons du site n'en portent pas.
+ */
+const ARROWS = /\s*[→←↗↘➝➔]\s*/g
+const str = (v: unknown, d: string) => {
+  const t = typeof v === 'string' ? v.replace(ARROWS, ' ').trim() : ''
+  return t || d
+}
 const arr = <T,>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : [])
 
 async function fetchRow(query: string, id: string): Promise<Row> {

@@ -35,6 +35,9 @@ export default function ProjetsGallery({
   }, [slides])
 
   const [index, setIndex] = useState(0)
+  // Photo réellement affichée. Elle ne change qu'une fois la suivante
+  // entièrement chargée : on ne voit jamais de flou ni de cadre vide.
+  const [shown, setShown] = useState(0)
   const count = slides.length
   const current = slides[index]
   const project = current?.project
@@ -112,22 +115,34 @@ export default function ProjetsGallery({
             e.currentTarget.dataset.side = e.clientX - r.left < r.width / 3 ? 'prev' : 'next'
           }}
         >
-          <div key={index} className="gallery-photo">
-            <Photo
-              image={photo}
-              fill
-              fit="contain"
-              priority
-              sizes="(max-width: 768px) 100vw, 86vw"
-              alt={photo.alt || `${project.title}, photo ${current.photoIdx + 1}`}
-            />
-          </div>
-          {/* Préchargement des voisines : le changement de photo ne montre
-              jamais de vide. */}
-          <div className="sr-only" aria-hidden="true">
+          {(() => {
+            const base = slides[shown] ?? current
+            const baseImg = base.project.images[base.photoIdx]
+            return (
+              <div className="gallery-photo" key={`s-${shown}`}>
+                <Photo
+                  image={baseImg}
+                  fill
+                  fit="contain"
+                  priority
+                  noBlur
+                  sizes="(max-width: 768px) 100vw, 86vw"
+                  alt={baseImg.alt || `${base.project.title}, photo ${base.photoIdx + 1}`}
+                />
+              </div>
+            )
+          })()}
+          {index !== shown && (
+            <div className="gallery-photo gallery-photo--next" key={`n-${index}`} aria-hidden="true">
+              <Photo image={photo} fill fit="contain" priority noBlur sizes="(max-width: 768px) 100vw, 86vw" onLoad={() => setShown(index)} />
+            </div>
+          )}
+          {/* Voisines chargées d'avance (priority = chargement immédiat ;
+              en différé, elles ne se chargeaient jamais). */}
+          <div className="gallery-preload" aria-hidden="true">
             {neighbours.map(n => {
               const img = n.project.images[n.photoIdx]
-              return <Photo key={`${n.project.slug}-${n.photoIdx}`} image={img} fill sizes="(max-width: 768px) 100vw, 86vw" />
+              return <Photo key={`${n.project.slug}-${n.photoIdx}`} image={img} fill fit="contain" priority noBlur sizes="(max-width: 768px) 100vw, 86vw" />
             })}
           </div>
         </div>

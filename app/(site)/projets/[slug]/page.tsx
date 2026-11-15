@@ -86,7 +86,7 @@ export default async function ProjectPage({ params }: { params: { slug: string }
 
       <aside className="project-sidebar">
         <div>
-          <Link href="/projets" className="ed-link project-back">
+          <Link href="/projets" className="text-link project-back">
             Toutes les créations
           </Link>
 
@@ -158,7 +158,7 @@ export default async function ProjectPage({ params }: { params: { slug: string }
                 )}
                 {project.links.map((l, i) => (
                   <li key={i}>
-                    <a href={l.url} className="ed-link" target="_blank" rel="noopener noreferrer">
+                    <a href={l.url} className="text-link" target="_blank" rel="noopener noreferrer">
                       {l.label}
                       <span className="sr-only"> (nouvel onglet)</span>
                     </a>

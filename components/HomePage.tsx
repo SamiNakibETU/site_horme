@@ -110,51 +110,73 @@ function Hero({ home }: { home: HomePageCms }) {
 function CinematicScroll({ slides }: { slides: HomeSlideCms[] }) {
   const outerRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
-  const barRef = useRef<HTMLDivElement>(null)
-  const [activeIdx, setActiveIdx] = useState(0)
+  const counterRef = useRef<HTMLSpanElement>(null)
 
-  const trackWidthVw = slides.length * 55
-
-  // La piste est déplacée directement, sans passer par l'état React : une
-  // seule écriture de `transform` par image affichée. Avant, chaque
-  // événement de défilement re-rendait tout le composant.
+  // Défilement vertical -> glissement horizontal, sans aucun état React :
+  // tout s'écrit directement dans le DOM, une fois par image affichée.
+  // - La distance est mesurée en pixels réels (largeur de la bande moins
+  //   l'écran). L'ancien calcul en vw supposait des photos de 55vw alors
+  //   qu'elles plafonnent à 560 px : la bande filait trop loin et finissait
+  //   sur un vide.
+  // - Un amorti (on parcourt 14 % de l'écart restant à chaque image) lisse
+  //   les crans de la molette, qui sautent de 100 px d'un coup.
   useEffect(() => {
     const outer = outerRef.current
     const track = trackRef.current
     if (!outer || !track) return
+    const items = Array.from(track.children) as HTMLElement[]
+    const ease = prefersReducedMotion() ? 1 : 0.14
+    let distance = 0
+    let target = 0
+    let current = 0
     let frame = 0
-    let last = -1
+    let active = -1
 
-    const update = () => {
-      frame = 0
+    const measure = () => {
+      distance = Math.max(0, track.scrollWidth - window.innerWidth)
+    }
+    const readTarget = () => {
       const scrollable = outer.offsetHeight - window.innerHeight
-      if (scrollable <= 0) return
-      const p = Math.max(0, Math.min(1, -outer.getBoundingClientRect().top / scrollable))
-      track.style.transform = `translate3d(${-p * (trackWidthVw - 100)}vw,0,0)`
-      outer.style.setProperty('--edge-l', p > 0.02 ? '1' : '0')
-      outer.style.setProperty('--edge-r', p < 0.98 ? '1' : '0')
-      const idx = Math.min(slides.length - 1, Math.floor(p * slides.length))
-      if (idx !== last) {
-        last = idx
-        setActiveIdx(idx)
+      target = scrollable > 0 ? Math.max(0, Math.min(1, -outer.getBoundingClientRect().top / scrollable)) : 0
+    }
+    const render = () => {
+      current += (target - current) * ease
+      if (Math.abs(target - current) < 0.0005) current = target
+      track.style.transform = `translate3d(${(-current * distance).toFixed(2)}px,0,0)`
+      const idx = Math.min(slides.length - 1, Math.round(current * (slides.length - 1)))
+      if (idx !== active) {
+        if (active >= 0) items[active]?.removeAttribute('data-active')
+        items[idx]?.setAttribute('data-active', 'true')
+        active = idx
+        if (counterRef.current) counterRef.current.textContent = `${String(idx + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`
       }
+      frame = current === target ? 0 : requestAnimationFrame(render)
     }
-    const schedule = () => {
-      if (!frame) frame = requestAnimationFrame(update)
+    const kick = () => {
+      readTarget()
+      if (!frame) frame = requestAnimationFrame(render)
     }
-    update()
-    window.addEventListener('scroll', schedule, { passive: true })
-    window.addEventListener('resize', schedule)
+    const onResize = () => {
+      measure()
+      kick()
+    }
+
+    measure()
+    readTarget()
+    current = target
+    render()
+    window.addEventListener('scroll', kick, { passive: true })
+    window.addEventListener('resize', onResize)
+    // Les photos changent la largeur de la bande en se chargeant.
+    const ro = new ResizeObserver(onResize)
+    ro.observe(track)
     return () => {
-      window.removeEventListener('scroll', schedule)
-      window.removeEventListener('resize', schedule)
+      window.removeEventListener('scroll', kick)
+      window.removeEventListener('resize', onResize)
+      ro.disconnect()
       if (frame) cancelAnimationFrame(frame)
     }
-  }, [slides.length, trackWidthVw])
-
-  useEffect(() => {
-    if (barRef.current) barRef.current.style.transform = `scaleX(${(activeIdx + 1) / slides.length})`
-  }, [activeIdx, slides.length])
+  }, [slides.length])
 
   if (!slides.length) return null
 
@@ -165,7 +187,7 @@ function CinematicScroll({ slides }: { slides: HomeSlideCms[] }) {
         <div className="cine-mobile-track" tabIndex={0} aria-label="Photos de la compagnie">
           {slides.map((s, i) => (
             <div key={i} className="cine-mobile-item" data-fit={s.objectFit}>
-              <Photo image={s.image} fill fit={s.objectFit} sizes="72vw" priority={i < 2} />
+              <Photo image={s.image} fill fit={s.objectFit} sizes="80vw" priority={i < 2} />
             </div>
           ))}
         </div>
@@ -179,26 +201,19 @@ function CinematicScroll({ slides }: { slides: HomeSlideCms[] }) {
         className="cine-desktop-wrap"
         ref={outerRef}
         data-nav-theme="light"
-        style={{ height: `${slides.length * 60}vh` }}
+        style={{ height: `${Math.max(2, slides.length) * 55}vh` }}
       >
         <div className="cine-sticky">
-          <div ref={trackRef} className="cine-track" style={{ width: `${trackWidthVw}vw` }}>
+          <div ref={trackRef} className="cine-track">
             {slides.map((s, i) => (
-              <div key={i} className="cine-item" data-fit={s.objectFit} data-active={activeIdx === i}>
-                <Photo image={s.image} fill fit={s.objectFit} sizes="(max-width: 1200px) 45vw, 520px" priority={i < 2} />
+              <div key={i} className="cine-item" data-fit={s.objectFit}>
+                <Photo image={s.image} fill fit={s.objectFit} sizes="(max-width: 1200px) 45vw, 560px" priority={i < 2} />
               </div>
             ))}
           </div>
-          <div className="cine-edge cine-edge--l" aria-hidden="true" />
-          <div className="cine-edge cine-edge--r" aria-hidden="true" />
-          <div className="cine-counter" aria-hidden="true">
-            <span>
-              {String(activeIdx + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}
-            </span>
-            <div className="cine-counter__bar">
-              <div ref={barRef} />
-            </div>
-          </div>
+          <span ref={counterRef} className="cine-counter" aria-hidden="true">
+            01 / {String(slides.length).padStart(2, '0')}
+          </span>
         </div>
       </div>
     </>

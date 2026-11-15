@@ -13,6 +13,9 @@ type Props = {
   priority?: boolean
   className?: string
   style?: CSSProperties
+  /** Sans aperçu flou : pour une visionneuse où l'image précédente reste affichée. */
+  noBlur?: boolean
+  onLoad?: () => void
 }
 
 /**
@@ -25,14 +28,15 @@ type Props = {
  *   dans le cadre quel que soit l'écran.
  * - Le `srcset` est servi par le CDN de Sanity (voir lib/imageLoader.ts).
  */
-export default function Photo({ image, sizes, alt, fill, fit = 'cover', priority, className, style }: Props) {
+export default function Photo({ image, sizes, alt, fill, fit = 'cover', priority, className, style, noBlur, onLoad }: Props) {
   const altText = alt ?? image.alt ?? ''
   const common = {
     src: image.url,
     sizes,
     priority,
     className,
-    ...(image.lqip ? { placeholder: 'blur' as const, blurDataURL: image.lqip } : {}),
+    onLoad,
+    ...(image.lqip && !noBlur ? { placeholder: 'blur' as const, blurDataURL: image.lqip } : {}),
   }
   if (fill) {
     return (

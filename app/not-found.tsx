@@ -9,7 +9,7 @@ export default function NotFound() {
       <p className="ed-body">Cette page a peut-être changé d’adresse.</p>
       <div className="notfound__links">
         <Link href="/" className="ed-link">Accueil</Link>
-        <Link href="/projets" className="ed-link">Créations</Link>
+        <Link href="/projets" className="text-link">Créations</Link>
       </div>
     </main>
   )
