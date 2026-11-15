@@ -24,7 +24,7 @@ export default function PageTransition({ children }: { children: React.ReactNode
         { opacity: 0, transform: 'translateY(8px)' },
         { opacity: 1, transform: 'none' },
       ],
-      { duration: 420, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' },
+      { duration: 240, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' },
     )
   }, [pathname])
 
