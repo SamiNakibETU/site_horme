@@ -17,7 +17,6 @@ export const metadata: Metadata = {
 export default async function LegalPage() {
   const [l, s, c] = await Promise.all([getLegalPage(), getSiteSettings(), getContactPage()])
   const email = l.contactEmail || c.email
-  const missing = <span className="legal-missing">à compléter dans le CMS (Mentions légales)</span>
 
   return (
     <main data-nav-theme="light" className="page">
@@ -27,12 +26,16 @@ export default async function LegalPage() {
         <dl className="legal">
           <div>
             <dt className="ed-caption">Éditeur</dt>
-            <dd style={{ whiteSpace: 'pre-line' }}>{l.publisher || <>{s.siteName}, {missing}</>}</dd>
+            <dd style={{ whiteSpace: 'pre-line' }}>{l.publisher || s.siteName}</dd>
           </div>
-          <div>
-            <dt className="ed-caption">Direction de la publication</dt>
-            <dd>{l.director || missing}</dd>
-          </div>
+          {/* Champ vide dans le CMS : la ligne n'apparaît pas, plutôt que
+              d'exposer une note de travail au public. */}
+          {l.director && (
+            <div>
+              <dt className="ed-caption">Direction de la publication</dt>
+              <dd>{l.director}</dd>
+            </div>
+          )}
           <div>
             <dt className="ed-caption">Contact</dt>
             <dd>
