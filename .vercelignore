@@ -1,0 +1,7 @@
+# Jamais envoyé à Vercel lors d'un déploiement en ligne de commande.
+backups/
+.next/
+node_modules/
+.env*
+!.env.example
+*.tsbuildinfo
