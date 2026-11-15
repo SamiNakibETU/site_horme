@@ -214,8 +214,8 @@ a { color: inherit; text-decoration: none; }
 }
 .ed-label__rule { display: none; }
 
-/* Bouton : un bloc plein, sans trait ni flèche. Au survol il passe au noir ;
-   à l'appui il s'enfonce légèrement. */
+/* Bouton : un contour fin dans la couleur d'accent, sans flèche. Il se
+   remplit au survol ; à l'appui il s'enfonce légèrement. */
 .ed-link {
   display: inline-flex;
   align-items: center;
@@ -228,12 +228,13 @@ a { color: inherit; text-decoration: none; }
   line-height: 1;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: #fff;
-  background: var(--blue);
-  transition: background-color 200ms var(--ease-out), transform 160ms var(--ease-out);
+  color: var(--blue);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--blue);
+  transition: background-color 200ms var(--ease-out), color 200ms var(--ease-out), transform 160ms var(--ease-out);
 }
 @media (hover: hover) and (pointer: fine) {
-  .ed-link:hover { background: var(--ink); }
+  .ed-link:hover { background: var(--blue); color: #fff; }
 }
 .ed-link:active { transform: scale(0.97); }
 
